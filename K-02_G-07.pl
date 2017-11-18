@@ -12,25 +12,29 @@ Anggota kelompok :
 /*Dynamics fact disini itu fact bisa berubah2 seiring berjalan game
 *Untuk player position ,look, dll yang berhubungan sama map itu belum bisa dibikin
 */
-:- dynamic(player_pos/1, item/2, ingamestate/1, bag/1, health/1, hunger/1, thirsty/1, weapon/1).
-
-/***** Deklarasi Fakta *****/
+:- use_module(library(random)).
+:- dynamic(player_pos/2, item/2, ingamestate/1, bag/1, health/1, hunger/1, thirsty/1, weapon/1).
 
 /*Inisialisasi game
 * 0 = belum mulai permainan | udah mati, 1 = hidup | sedang bermain
 */
 ingamestate(0). 
 
-/*Place list
-* Harus dikoreksi soalnya mapnya bener2 besar ini cuma nyoba2 
+/***** Deklarasi Fakta *****/
+place(0, openfield).
+place(1, openfield).
+place(2, garden).
+place(3, armory).
+place(4, openfield).
+place(5, forest).
+place(6, cave).
+place(7, lake).
+
+/*locate
+* Perhitungan : x mod 5 = 0<=a<=4 , y mod 4 = 0<=b<=3,0<= a+b <=7 
+* Misal ->  a = openfield, b = lake, dst
 */
-place(openfield).
-place(infirmary).
-place(armory).
-place(outer_castle).
-place(mount_doom).
-place(garden).
-place(village).
+locate(X, Y, Place) :- A is X mod 5, B is Y mod 4, N is A+B, place(N, Place).
 
 /* Game loop */
 game_loop   :- ingamestate(1),
@@ -44,7 +48,7 @@ game_loop   :- ingamestate(1),
 
 /* Basic rules */
 writelist([]):- nl.
-writelist([H|T]):- write(H),nl,writelist(T).
+writelist([H|T]):- write('> '), write(H),nl,writelist(T).
 writeln(X) :- write(X), nl.
 isMember(X, [X|_]).
 isMember(X, [Y|Z]) :- X\==Y, isMember(X,Z).
@@ -72,16 +76,18 @@ run(load(FileName)) :- load(FileName), nl, !.
 /***** Commands *****/
 start:- writeln('Welcome to Alice vs Umbrella Corp.!'),
 		writeln('White Queen Kingdom has been invaded by Umbrella Corp.!'),
-		writeln('Help Alice to defeat ten zombies!'),
+		writeln('Help Alice to defeat the invaders!'),
 		help,
 		restartgame,
-		asserta(item(lake,[freshwater])),
-		asserta(item(openfield,[apple,knife])),
-		asserta(item(armory,[sword,maps])),
+		asserta(item(lake,[water, meat, axe])),
+		asserta(item(openfield,[])),
+		asserta(item(armory,[sword, medicine])),
 		asserta(item(garden,[hoe,banana])),
-		asserta(item(infirmary,[medicine,meat,orangejuice])),
-		asserta(item(outer_castle,[waterpouch,axe])),
-		asserta(player_pos(openfield)),
+		asserta(item(forest,[pig,honey])),
+		asserta(item(cave,[bandage,spear])),
+		random(0, 10, X), /*random Alice (X position)*/
+ 		random(0, 20, Y), /*random Alice (Y position)*/
+		asserta(player_pos(X,Y)),
 		asserta(health(100)),
 		asserta(hunger(100)),
 		asserta(thirsty(100)),
@@ -94,36 +100,41 @@ start:- writeln('Welcome to Alice vs Umbrella Corp.!'),
 restartgame :- 
 		retract(ingamestate(_A)),
 		asserta(ingamestate(0)),
-		retract(player_pos(_B)),
+		retract(player_pos(_X,_Y)),
 		retract(bag(_C)),
 		retract(item(openfield,_)),
 		retract(item(lake,_)),
 		retract(item(armory,_)),
 		retract(item(garden,_)),
-		retract(item(outer_castle,_)),
-		retract(item(infirmary,_)),
+		retract(item(cave,_)),
+		retract(item(forest,_)),
 		retract(health(_D)),
 		retract(hunger(_E)),
 		retract(thirsty(_F)),
 		retract(weapon(_G)), !.
 		restartgame.
 
-look :- writeln('').
+look :- ingamestate(1),
+		player_pos(X, Y),
+		locate(X, Y, Place),nl,
+		item(Place, ItemList),
+		write('You are in '), write(Place), write('.'), nl, 
+		writeln('Items in this place is/are '), writelist(ItemList), !. 
 
 help :- writeln('These are the available commands:'),
-		writeln('- start. (start the game)'),
-		writeln('- n,e,w,s (go to somewhere follow compass rule)'),
-		writeln('- look. (look things around you)'),
-		writeln('- help. (see available commands)'),
-		writeln('- maps. (show map if you have one)'),
-		writeln('- take(Obj). (pick up an object)'),
-		writeln('- drop(Obj). (drop an object)'),
-		writeln('- use(Obj). (use an object)'),
-		writeln('- attack. (attack enemy that accross your path)'),
-		writeln('- status. (display Alice status)'),
-		writeln('- save(FileName). (save your game)'),
-		writeln('- load(FileName). (load previously saved game)'),
-		writeln('- quit. (quit the game)'),
+		writeln('- start.          = start the game.'),
+		writeln('- n. e. w. s.     = go to somewhere (follow compass rules).'),
+		writeln('- look.           = look things around you.'),
+		writeln('- help.           = see available commands.'),
+		writeln('- maps.           = show map if you have one.'),
+		writeln('- take(Obj).      = pick up an object.'),
+		writeln('- drop(Obj).      = drop an object.'),
+		writeln('- use(Obj)        = use an object.'),
+		writeln('- attack.         = attack enemy that accross your path.'),
+		writeln('- status.         = display Alice status.'),
+		writeln('- save(FileName). = save your game.'),
+		writeln('- load(FileName). = load previously saved game.'),
+		writeln('- quit.           = quit the game.'),
 		writeln('Legends : '),
 		writeln('W = Water'),
 		writeln('M = Medicine'),
@@ -149,9 +160,9 @@ status :- ingamestate(1),
 		health(HP),
 		thirsty(T),
 		bag(BagList),
-		write('Health = '), writeln(HP),
-		write('Thirsty = '), writeln(T),
-		writeln('Weapon = '), writelist(WeaponList),
+		write('Health    = '), writeln(HP),
+		write('Thirsty   = '), writeln(T),
+		writeln('Weapon    = '), writelist(WeaponList),
 		writeln('Inventory = '), writelist(BagList),!.
 
 save(FileName) :- write('').
