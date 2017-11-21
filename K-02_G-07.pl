@@ -61,10 +61,12 @@ path(Xa,Ya,north,Xb,Yb) :- Ya < 20, Yb is Ya + 1, Xb is Xa,!.
 path(Xa,Ya,south,Xb,Yb) :- Ya >= 1, Yb is Ya - 1, Xb is Xa,!.
 
 /* Basic rules */
+writeifenemynearby([]) :- true,!.
+writeifenemynearby(List) :- isEnemy(List), write(' and there is an eneny here..Watch out!!').
 isdefined(X,Y) :- X>=0, X<11, Y>=0, Y<21.
 islistkosong([]).
-isEnemy([]) :- fail.
-isEnemy([H|T]) :- zombie(H), !,isEnemy(T).
+isEnemy([]).
+isEnemy([H|T]) :- zombie(H), isEnemy(T).
 konso(X,L,[X|L]).
 writelist([]):- nl.
 writelist([H|T]):- write('> '), write(H),nl,writelist(T).
@@ -146,10 +148,7 @@ init_zombies :-
 							asserta(insidethisplace(Xg,Yg,_G,RListg)),
 							asserta(insidethisplace(Xh,Yh,_H,RListh)),
 							asserta(insidethisplace(Xi,Yi,_I,RListi)),
-							asserta(insidethisplace(Xj,Yj,_J,RListj)),
-							retract(player_pos(X,Y)),
-							asserta(player_pos(Xb,Yb))
-							.
+							asserta(insidethisplace(Xj,Yj,_J,RListj)).
 
 init_dynamic_facts(X,Y) :-
 									X == 11 ,true.
@@ -220,7 +219,7 @@ restartgame :-
 
 prio(X,Y) :- \+isdefined(X,Y),
 							write('#'),!.
-prio(X,Y) :- insidethisplace(X,Y,List,EList), isEnemy(EList),
+prio(X,Y) :- insidethisplace(X,Y,List,EList), \+islistkosong(EList), isEnemy(EList),
   						write('E'),!.
 prio(X,Y) :-insidethisplace(X,Y,List,EList) , islistkosong(List), player_pos(M,N),
 							M == X, N == Y,
@@ -288,8 +287,7 @@ look :- ingamestate(1),
 		write('  '), prio(A,D),
 		write('  '), prio(B,D),
 		write('  '), prio(C,D),nl,
-		writelist(EList),
-		write('You are in '), write(Place), nl,
+		write('You are in '), write(Place), writeifenemynearby(EList), nl,
 		writeln('Items in this place is/are '), writelist(List),!.
 
 help :- writeln('These are the available commands:'),
