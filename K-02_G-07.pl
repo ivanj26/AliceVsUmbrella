@@ -1,12 +1,13 @@
 /* Nama File : K02_Alice_vs_Umbrella.pl */
 /* Alice vs The Umbrella Corperation */
+/* Tugas Besar IF2121 Logika Informatika */
 
 /*
 Anggota kelompok :
-	1.
-	2.
-	3.
-	4.
+	1. Ivan Jonathan			13516059
+	2. Seperayo					13516068
+	3. Muhammad Alfian Rasyidin	13516104
+	4. Hafizh Budiman			13516137
 */
 
 /*Dynamics fact disini itu fact bisa berubah2 seiring berjalan game
@@ -95,7 +96,7 @@ run(start) :- start, nl,  !.
 run(attack) :- attack, nl, !.
 run(status) :- status, nl, !.
 run(save(FileName)) :- save(FileName), nl, !.
-run(load(FileName)) :- load(FileName), nl, !.
+run(loads(FileName)) :- loads(FileName), nl, !.
 
 /***** Commands *****/
 init_zombies :-
@@ -261,16 +262,14 @@ prio(X,Y) :- player_pos(A,B),
 printmap(X,Y) :- Y == 21 , nl, player_pos(R,T), write('Your location is ('), write(R), write(',') , write(T), writeln('). Relative to the corner left which is (0,0)'), true.
 
 printmap(X,Y) :- X < 11, Y < 21,
-						write(' '), prio(X,Y), write(' '),
-						M is X+1,
-						N is Y,
-						printmap(M,N).
-printmap(X,Y) :-
-						X == 10, Y < 21,
-						write(' '), prio(X,Y) , nl,
-						M is 0,
-						N is Y+1,
-						printmap(M,N).
+				write(' '), prio(X,Y), write(' '),
+				M is X+1, N is Y,
+				printmap(M,N).
+
+printmap(X,Y) :- X == 10, Y < 21,
+				write(' '), prio(X,Y) , nl,
+				M is 0, N is Y+1,
+				printmap(M,N).
 
 /* 		asserta(item(lake,[waterpouch, meat, axe])),
 		asserta(item(openfield,[])),
@@ -348,9 +347,47 @@ status :- ingamestate(1),
 		writeln('Weapon    = '), writelist(WeaponList),
 		writeln('Inventory = '), writelist(BagList),!.
 
-save(FileName) :- write('').
+save(FileName) :- open(FileName,write,_Stream),
+				player_pos(X,Y),
+				write(_Stream,X), write(_Stream,'.'), nl(_Stream),
+				write(_Stream,Y), write(_Stream,'.'), nl(_Stream),
+				close(_Stream),
+				savemap(0,0,FileName).
 
-loads(FileName) :- write('').
+savemap(X,Y,FileName) :- Y==21, !.
+savemap(X,Y,FileName) :- X < 10, Y < 21,
+				open(FileName,append,_Stream),
+				write(_Stream,X), write(_Stream, '.'), nl(_Stream),
+				write(_Stream,Y), write(_Stream, '.'), nl(_Stream),
+				insidethisplace(X,Y,_A,_B),
+				loopListItem(_Stream,_A),
+				loopListItem(_Stream,_B),
+				nl(_Stream),
+				close(_Stream),
+				M is X+1, N is Y,
+				savemap(M,N,FileName).
+savemap(X,Y,FileName) :- X == 10, Y < 21,
+				open(FileName,append,_Stream),
+				write(_Stream,X), write(_Stream, '.'), nl(_Stream),
+				write(_Stream,Y), write(_Stream, '.'), nl(_Stream),
+				insidethisplace(X,Y,_A,_B),
+				loopListItem(_Stream,_A),
+				loopListItem(_Stream,_B),
+				nl(_Stream),
+				close(_Stream),
+				M is 0, N is Y+1,
+				savemap(M,N,FileName).
+
+loopListItem(_Stream,[]) :- !.
+loopListItem(_Stream,[_H|_T]) :-
+					write(_Stream,_H),write(_Stream,'.'), nl(_Stream),
+					loopListItem(_Stream,_T).
+
+loads(FileName) :- open(FileName,read,_Stream),
+					read(_Stream, X),
+					read(_Stream,Y),
+					asserta(player_pos(X,Y)),
+					close(_Stream).
 
 quit :- write('Alice gives up to the zombies. Game over.'), halt.
 
