@@ -14,7 +14,7 @@ Anggota kelompok :
 *Untuk player position ,look, dll yang berhubungan sama map itu belum bisa dibikin
 */
 :- use_module(library(random)).
-:- dynamic(player_pos/2, item/2, insidethisplace/4, ingamestate/1, bag/1, health/2, hunger/1, thirsty/1, weapon/1).
+:- dynamic(win/1, player_pos/2, item/2, insidethisplace/4, ingamestate/1, bag/1, health/1, hunger/1, thirsty/1, weapon/1, enemypower/2, countstep/1).
 
 /*Inisialisasi game
 * 0 = belum mulai permainan atau udah mati, 1 = hidup atau sedang bermain
@@ -53,7 +53,7 @@ game_loop   :- ingamestate(1),
 			write('<command>  '),
 			read(X),
 			run(X),
-			(X==quit), !.
+			(checkWinner ; X==quit), !, halt.
 
 /* Path (from - to)*/
 path(Xa,Ya,east,Xb,Yb) :- Xa < 10, Xb is Xa + 1, Yb is Ya,!.
@@ -62,6 +62,8 @@ path(Xa,Ya,north,Xb,Yb) :- Ya < 20, Yb is Ya - 1, Xb is Xa,!.
 path(Xa,Ya,south,Xb,Yb) :- Ya >= 1, Yb is Ya + 1, Xb is Xa,!.
 
 /* Basic rules */
+checkWinner :- win(X), X == 0, writeln('Oh no! Alice is exhausted and cannot move again!.. White Kingdom is fully occupied by Umbrella corp, Game over!.'),!.
+checkWinner :- win(X), X == 1, writeln('Hooray!!.. Good job, Alice! All the zombies are down.'),!,halt.
 writeifenemynearby([]) :- true,!.
 writeifenemynearby(List) :- isEnemy(List), write(' and there is an eneny here..Watch out!!').
 isdefined(X,Y) :- X>=0, X<11, Y>=0, Y<21.
@@ -87,7 +89,7 @@ run(south) :- south, nl,!.
 run(west) :- west, nl,!.
 run(look) :- look, nl, !. /* */
 run(help) :- help, nl, !. /* */
-run(quit) :- quit, nl, !. /* */
+run(quit) :- quit, nl, !. /* predikat yang menyebabkan game berakhir */
 run(maps) :- maps, nl,!.
 run(take(Obj)) :- take(Obj), nl, !.
 run(drop(Obj)) :- drop(Obj), nl, !.
@@ -152,7 +154,7 @@ init_zombies :-
 							asserta(insidethisplace(Xj,Yj,_J,RListj)).
 
 init_dynamic_facts(X,Y) :-
-									X == 11 ,true.
+									X == 11, Y >= 0, true.
 
 init_dynamic_facts(X,Y) :-
 									X < 11, Y < 20,
@@ -179,19 +181,21 @@ start:- writeln('Welcome to Alice vs Umbrella Corp.!'),
 		random(0, 10, X), /*random Alice (X position)*/
  		random(0, 20, Y), /*random Alice (Y position)*/
 		asserta(player_pos(X,Y)),
-		asserta(health(alice,100)),
-		asserta(health(majini_Undead,80)),
-		asserta(health(kipepo,50)),
-		asserta(health(uberlicker,50)),
-		asserta(health(fenrir,60)),
-		asserta(health(scagdead,60)),
-		asserta(health(aceleozzo,50)),
-		asserta(health(farfarello,40)),
-		asserta(health(malacoda, 30)),
-		asserta(health(cerberus,35)),
-		asserta(health(chimera,40)),
+		asserta(health(100)),
+		asserta(win(-1)),
+		asserta(countstep(0)),
+		asserta(enemypower(majiniundead,30)),
+		asserta(enemypower(kipepo,10)),
+		asserta(enemypower(uberlicker,14)),
+		asserta(enemypower(fenrir,23)),
+		asserta(enemypower(scagdead,32)),
+		asserta(enemypower(aceleozzo,6)),
+		asserta(enemypower(farfarello,20)),
+		asserta(enemypower(malacoda, 23)),
+		asserta(enemypower(cerberus,15)),
+		asserta(enemypower(chimera,20)),
 		asserta(hunger(100)),
-		asserta(thirsty(100)),
+		asserta(thirsty(2)),
 		asserta(weapon([])),
 		asserta(bag([])),
 		asserta(item(lake,[waterpouch, meat, axe])),
@@ -212,7 +216,9 @@ restartgame :-
 		retract(insidethisplace(_R,_T,_U,_V)),
 		retract(player_pos(_X,_Y)),
 		retract(bag(_C)),
-		retract(health(_K,_D)),
+		retract(win(_M)),
+		retract(countstep(_S)),
+		retract(health(_K)),
 		retract(hunger(_E)),
 		retract(thirsty(_F)),
 		retract(weapon(_G)), !.
@@ -339,10 +345,12 @@ attack	:- write('').
 
 status :- ingamestate(1),
 		weapon(WeaponList),
-		health(alice,HP),
+		health(HP),
+		hunger(_H),
 		thirsty(T),
 		bag(BagList),
 		write('Health    = '), writeln(HP),
+		write('Hunger    = '), writeln(_H),
 		write('Thirsty   = '), writeln(T),
 		writeln('Weapon    = '), writelist(WeaponList),
 		writeln('Inventory = '), writelist(BagList),!.
@@ -391,14 +399,61 @@ loads(FileName) :- open(FileName,read,_Stream),
 
 quit :- write('Alice gives up to the zombies. Game over.'), halt.
 
-/*go_to another place with direction*/
+/*go_to another place with direction, 1 step Hunger-=1 dan 3 step Thirsty -= 1*/
+
+go(Direction) :-
+			ingamestate(1),
+			hunger(H),
+			H == 1,
+			retract(win(_X)),
+			asserta(win(0)),!.
+
+go(Direction) :-
+			ingamestate(1),
+			thirsty(T),
+			countstep(_S),
+			_S == 2,
+			T == 1,
+			retract(win(_X)),
+			asserta(win(0)),!.
 
 go(Direction) :-
 			ingamestate(1),
 			player_pos(Xa,Ya),
+			countstep(_S),
+			hunger(_H),
+			_S < 2,
 			path(Xa,Ya, Direction,Xb,Yb),nl,
 			write('You moved to the '), writeln(Direction),
 			retract(player_pos(Xa,Ya)),
+			retract(hunger(A)),
+			retract(countstep(B)),
+			Ha is _H - 1,
+			_NS is _S + 1,
+			asserta(countstep(_NS)),
+			asserta(hunger(Ha)),
+			asserta(player_pos(Xb,Yb)),
+			look, !.
+
+go(Direction) :-
+			ingamestate(1),
+			player_pos(Xa,Ya),
+			countstep(_S),
+			hunger(_H),
+			thirsty(_T),
+			_S == 2,
+			path(Xa,Ya, Direction,Xb,Yb),nl,
+			write('You moved to the '), writeln(Direction),
+			retract(player_pos(Xa,Ya)),
+			retract(hunger(A)),
+			retract(countstep(B)),
+			retract(thirsty(C)),
+			Ta is _T - 1,
+			Ha is _H - 1,
+			_NS is 0,
+			asserta(countstep(_NS)),
+			asserta(hunger(Ha)),
+			asserta(thirsty(Ta)),
 			asserta(player_pos(Xb,Yb)),
 			look, !.
 
