@@ -57,8 +57,8 @@ game_loop   :- ingamestate(1),
 /* Path (from - to)*/
 path(Xa,Ya,east,Xb,Yb) :- Xa < 10, Xb is Xa + 1, Yb is Ya,!.
 path(Xa,Ya,west,Xb,Yb) :- Xa >= 1, Xb is Xa - 1, Yb is Ya,!.
-path(Xa,Ya,north,Xb,Yb) :- Ya < 20, Yb is Ya + 1, Xb is Xa,!.
-path(Xa,Ya,south,Xb,Yb) :- Ya >= 1, Yb is Ya - 1, Xb is Xa,!.
+path(Xa,Ya,north,Xb,Yb) :- Ya < 20, Yb is Ya - 1, Xb is Xa,!.
+path(Xa,Ya,south,Xb,Yb) :- Ya >= 1, Yb is Ya + 1, Xb is Xa,!.
 
 /* Basic rules */
 writeifenemynearby([]) :- true,!.
@@ -258,6 +258,20 @@ prio(X,Y) :- player_pos(A,B),
 						Y==B,
 						write('A').
 
+printmap(X,Y) :- Y == 21 , nl, player_pos(R,T), write('Your location is ('), write(R), write(',') , write(T), writeln('). Relative to the corner left which is (0,0)'), true.
+
+printmap(X,Y) :- X < 11, Y < 21,
+						write(' '), prio(X,Y), write(' '),
+						M is X+1,
+						N is Y,
+						printmap(M,N).
+printmap(X,Y) :-
+						X == 10, Y < 21,
+						write(' '), prio(X,Y) , nl,
+						M is 0,
+						N is Y+1,
+						printmap(M,N).
+
 /* 		asserta(item(lake,[waterpouch, meat, axe])),
 		asserta(item(openfield,[])),
 		asserta(item(armory,[sword, medicine])),
@@ -278,15 +292,15 @@ look :- ingamestate(1),
 		D is Y - 1,
 		E is Y,
 		F is Y + 1,
-		write('  '), prio(A,F),
-		write('  '), prio(B,F),
-		write('  '), prio(C,F),nl,
-		write('  '), prio(A,E),
-		write('  '), prio(B,E),
-		write('  '), prio(C,E),nl,
 		write('  '), prio(A,D),
 		write('  '), prio(B,D),
 		write('  '), prio(C,D),nl,
+		write('  '), prio(A,E),
+		write('  '), prio(B,E),
+		write('  '), prio(C,E),nl,
+		write('  '), prio(A,F),
+		write('  '), prio(B,F),
+		write('  '), prio(C,F),nl,
 		write('You are in '), write(Place), writeifenemynearby(EList), nl,
 		writeln('Items in this place is/are '), writelist(List),!.
 
@@ -314,7 +328,7 @@ help :- writeln('These are the available commands:'),
 		writeln('# = Inaccesible'),
 		writeln('- = Accesible').
 
-maps :- write('').
+maps :-		printmap(0,0).
 
 take(Obj) :- write('').
 
