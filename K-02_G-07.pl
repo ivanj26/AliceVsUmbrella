@@ -354,7 +354,7 @@ status :- ingamestate(1),
 		write('Thirsty   = '), writeln(T),
 		writeln('Weapon    = '), writelist(WeaponList),
 		writeln('Inventory = '), writelist(BagList),!.
-
+		
 save(FileName) :- open(FileName,write,_Stream),
 				player_pos(X,Y),
 				write(_Stream,X), write(_Stream,'.'), nl(_Stream),
