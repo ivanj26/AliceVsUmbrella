@@ -363,7 +363,7 @@ status :- ingamestate(1),
 		write('Health    = '), writeln(HP),
 		write('Hunger    = '), writeln(_H),
 		write('Thirsty   = '), writeln(T),
-		writeln('Weapon    = '), write(Weapon),
+		writeln('Weapon    = '), write(Weapon), nl,
 		writeln('Inventory = '), writelist(BagList),!.
 
 save(FileName) :- write('').
