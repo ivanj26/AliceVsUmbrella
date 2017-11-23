@@ -3,10 +3,10 @@
 
 /*
 Anggota kelompok :
-	1. Ivan Jonathan			13516059
-	2. Seperayo					13516068
-	3. Muhammad Alfian Rasyidin	13516104
-	4. Hafizh Budiman			13516137
+	1.
+	2.
+	3.
+	4.
 */
 
 /*Dynamics fact disini itu fact bisa berubah2 seiring berjalan game
@@ -318,7 +318,7 @@ look :- ingamestate(1),
 
 help :- writeln('These are the available commands:'),
 		writeln('- start.          = start the game.'),
-		writeln('- north. east. west. south.     = go to somewhere (follow compass rules).'),
+		writeln('- north. east. west. south. = go to somewhere (follow compass rules).'),
 		writeln('- look.           = look things around you.'),
 		writeln('- help.           = see available commands.'),
 		writeln('- maps.           = show map if you have one.'),
@@ -328,8 +328,8 @@ help :- writeln('These are the available commands:'),
 		writeln('- attack.         = attack enemy that accross your path.'),
 		writeln('- status.         = display Alice status.'),
 		writeln('- save(FileName). = save your game.'),
-		writeln('- loads(FileName). = 	load previously saved game.'),
-		writeln('- quit.           = quit the game.'),
+		writeln('- loads(FileName).= load previously saved game.'),
+		writeln('- quit.     = quit the game.'),
 		writeln('Legends : '),
 		writeln('W = Water'),
 		writeln('M = Medicine'),
