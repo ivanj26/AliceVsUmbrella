@@ -91,6 +91,8 @@ delElmt(X,[X|Xs],Xs).
 delElmt(X,[Y|Xs],[Y|Ys]) :- X\==Y, delElmt(X,Xs,Ys).
 isLocation(X) :- list(location, List), isMember(X, List).
 objectLoc(X, Y) :- list(Y, List), isMember(X, List).
+count([],0).
+count([_|Tail], N) :- count(Tail, N1), N is N1 + 1.
 
 /***** Implementasi run command from input *****/
 run(north) :- north, nl,!.
@@ -343,9 +345,110 @@ help :- writeln('These are the available commands:'),
 maps :-	ingamestate(1),bag(ListItem), isMember(radar, ListItem),printmap(0,0),!.
 maps :- ingamestate(1),bag(ListItem),\+isMember(radar,ListItem),writeln('There is no radar in your bag. Try to find the radar to see full maps!'),!.
 
-take(Obj) :- write('').
+/* Describe object that is taken by Alice */
 
-drop(Obj) :- write('').
+desc(Obj) :- Obj == medicine,
+			writeln('While particularly ordinary, this medicine can quickly mend even the deepest of wounds.'),
+			writeln('Ability : Restore Alice''s health back to 100 when used.').
+
+desc(Obj) :- Obj == bandage,
+			writeln('An essential things that aids you to survive this mess.'),
+			writeln('Ability : Restore Alice''s health back to 100 when used.').
+
+desc(Obj) :- Obj == banana,
+			writeln('It''s a banana, what do you expect anyway. Peel it and just eat it.'),
+			writeln('Ability : Gain 2 hunger points when consumed.').
+
+desc(Obj) :- Obj == meat,
+			writeln('An ordinary Japanese kobe beef, except the taste is not.'),
+			writeln('Ability : Gain 2 hunger points when consumed.').
+
+desc(Obj) :- Obj == pig,
+			writeln('A black Iberian pork. You know how expensive it is, don''t you?.'),
+			writeln('Ability : Gain 2 hunger points when consumed.').
+
+desc(Obj) :- Obj == axe,
+			writeln('The bearer of this mighty axe gains the ability to cut down enemiy at one swing.'),
+			writeln('Ability : Slay zombie with one swing.').
+
+desc(Obj) :- Obj == spear,
+			writeln('A spear of sharpened rock blades imbued with magical fire.'),
+			writeln('Ability : Shattered zombie when thrown.').
+
+desc(Obj) :- Obj == sword,
+			writeln('Only the mightiest and most experienced of warriors can wield this relic sword.'),
+			writeln('Ability : Demolish zombie with one swing.').
+
+desc(Obj) :- Obj == waterpouch,
+			writeln('An old waterpouch made from cattle skin.'),
+			writeln('Ability : Gain 2 thirst points when drinked.').
+
+desc(Obj) :- Obj == honey,
+			writeln('Sweet.'),
+			writeln('Ability : Gain 2 hunger points when consumed.').
+
+desc(Obj) :- Obj == radar,
+			writeln('Grants the ability to see every items and zombies').
+
+/* Take object from where you are, and put it in backpack, max item in backpack = 4 */
+
+take(Obj) :- ingamestate(1),
+						bag(BagList),
+						count(BagList,Total),
+						Total < 4,
+						player_pos(X, Y),
+						locationName(X, Y, _),
+						insidethisplace(X,Y,List,_),
+						isMember(Obj,List),
+						retract(insidethisplace(X,Y,List,_)),
+						retract(bag(BagList)),
+						delElmt(Obj,List,ListNew),
+						append([Obj],BagList,BagListNew),
+						asserta(bag(BagListNew)),
+						asserta(insidethisplace(X,Y,ListNew,_)), nl,
+						write('You have succesfully taken a '), write(Obj) , nl, 
+						desc(Obj), !.
+
+take(Obj) :- ingamestate(1),
+						player_pos(X, Y),
+						insidethisplace(X,Y,List,_),
+						\+isMember(Obj,List), nl,
+						writeln('What are you, drunk? Alice? That item''s not even here, you can''t just take it outta nowhere.').
+
+take(_) :- ingamestate(1),
+						bag(BagList),
+						count(BagList,Total),
+						Total==4, 
+						write('Alice, you gonna need a bigger bag to take that,'), nl, 
+						write('or you could simply drop something first before taking it.'), nl, !.
+
+/* Drop object from your backpack to the place */
+
+drop(Obj) :- ingamestate(1),
+						bag(BagList),
+						isMember(Obj,BagList),
+						count(BagList,Total),
+						Total > 0,
+						player_pos(X, Y),
+						insidethisplace(X,Y,List,_),
+						retract(insidethisplace(X,Y,List,_)),
+						retract(bag(BagList)),
+						delElmt(Obj,BagList,BagListNew),
+						append([Obj],List,ListNew),
+						asserta(bag(BagListNew)),
+						asserta(insidethisplace(X,Y,ListNew,_)), nl,
+						write('You have succesfully dropped your '), write(Obj) , nl, !.
+
+drop(Obj) :- ingamestate(1),
+						bag(BagList),
+						\+isMember(Obj,BagList), nl,
+						writeln('Stop hallucinating, Alice. You don''t have that thing in your backpack.'),nl,!.
+
+drop(_) :- ingamestate(1),
+						bag(BagList),
+						count(BagList,Total),
+						Total==0, 
+						write('You don''t have anything in your backpack.'), nl, !.
 
 use(Obj) :- bag(BagList),
 						isfood(Obj),
@@ -438,8 +541,8 @@ use(Obj) :- bag(BagList),
 						retract(bag(_B)),
 						asserta(bag(NBagList)),
 						asserta(health(100)),nl,
-						write('Alice use '), write(Obj), nl,
-						writeln('I\'m feel better now :)'),!.
+						write('Alice uses '), write(Obj), nl,
+						writeln('I feel better now :)'),!.
 
 use(Obj) :- bag(BagList),
 						ismedicine(Obj),
