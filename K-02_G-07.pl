@@ -3,10 +3,10 @@
 
 /*
 Anggota kelompok :
-	1.
-	2.
-	3.
-	4.
+	1. Hafizh Budiman
+	2. Ivan Jonathan
+	3. M. Alfian
+	4. Seperayo
 */
 
 /*Dynamics fact disini itu fact bisa berubah2 seiring berjalan game
@@ -44,6 +44,7 @@ isfood(meat).
 isfood(banana).
 isfood(pig).
 isweapon(axe).
+isweapon(hoe).
 isweapon(spear).
 isweapon(sword).
 isdrink(waterpouch).
@@ -72,6 +73,7 @@ path(Xa,Ya,north,Xb,Yb) :- Ya >= 1 , Yb is Ya - 1, Xb is Xa,!.
 path(Xa,Ya,south,Xb,Yb) :- Ya < 20 , Yb is Ya + 1, Xb is Xa,!.
 
 /* Basic rules */
+checkWinner :- kills(X), X == 10, writeln('Hooray!!.. Good job, Alice! All the zombies are down.'),!,halt.
 checkWinner :- win(X), X == 0, writeln('Oh no! Alice is exhausted and can\'t move again!.. White Kingdom is fully occupied by Umbrella corp, Game over!.'),!.
 checkWinner :- win(X), X == 1, writeln('Hooray!!.. Good job, Alice! All the zombies are down.'),!,halt.
 writeifenemynearby([]) :- true,!.
@@ -218,6 +220,7 @@ start:- writeln('Welcome to Alice vs Umbrella Corp.!'),
 		asserta(item(cave,[bandage,spear])),
 		init_dynamic_facts(0,0),
 		init_zombies,
+		asserta(kills(0)),
 		retract(insidethisplace(X,Y,_AddRadar,_EL)),
 		append([radar], _AddRadar, _AddRadar2),
 		asserta(insidethisplace(X,Y,_AddRadar2,_EL)),
@@ -226,6 +229,8 @@ start:- writeln('Welcome to Alice vs Umbrella Corp.!'),
 		game_loop.
 
 restartgame :-
+		retract(kills(_P)),
+		retract(enemypower(_YY,_TT)),
 		retract(ingamestate(_A)),
 		asserta(ingamestate(0)),
 		retract(insidethisplace(_R,_T,_U,_V)),
@@ -280,7 +285,7 @@ prio(X,Y) :- player_pos(A,B),
 						Y==B,
 						write('A').
 
-printmap(_,Y) :- Y == 21 , nl, player_pos(R,T), write('Your location is ('), write(R), write(',') , write(T), writeln('). Relative to the bottom corner left which is (0,0)'), true.
+printmap(_,Y) :- Y == 21 , nl, player_pos(R,T), write('Your location is ('), write(R), write(',') , write(T), writeln('). Relative to the top left corner which is (0,0)'), true.
 
 printmap(X,Y) :- X < 11, Y < 21,
 						write(' '), prio(X,Y), write(' '),
@@ -295,7 +300,6 @@ printmap(X,Y) :-
 						printmap(M,N).
 
 /* Skala prioritas penampilan peta: Enemy > Medicine > Food > Water > Weapon > Player. */
-
 look :- ingamestate(1),
 		player_pos(X, Y),
 		locationName(X, Y, Place),
@@ -406,7 +410,7 @@ take(Obj) :- ingamestate(1),
 						append([Obj],BagList,BagListNew),
 						asserta(bag(BagListNew)),
 						asserta(insidethisplace(X,Y,ListNew,_)), nl,
-						write('You have succesfully taken a '), write(Obj) , nl, 
+						write('You have succesfully taken a '), write(Obj) , nl,
 						desc(Obj), !.
 
 take(Obj) :- ingamestate(1),
@@ -418,8 +422,8 @@ take(Obj) :- ingamestate(1),
 take(_) :- ingamestate(1),
 						bag(BagList),
 						count(BagList,Total),
-						Total==4, 
-						write('Alice, you gonna need a bigger bag to take that,'), nl, 
+						Total==4,
+						write('Alice, you gonna need a bigger bag to take that,'), nl,
 						write('or you could simply drop something first before taking it.'), nl, !.
 
 /* Drop object from your backpack to the place */
@@ -447,7 +451,7 @@ drop(Obj) :- ingamestate(1),
 drop(_) :- ingamestate(1),
 						bag(BagList),
 						count(BagList,Total),
-						Total==0, 
+						Total==0,
 						write('You don''t have anything in your backpack.'), nl, !.
 
 use(Obj) :- bag(BagList),
@@ -604,7 +608,7 @@ status :- ingamestate(1),
 		write('Weapon    = '), writelist(WeaponList),
 		writeln('Inventory = '), writelist(BagList),!.
 
-save(FileName) :- tell(FileName), listing(player_pos), listing(bag), listing(health), 
+save(FileName) :- tell(FileName), listing(player_pos), listing(bag), listing(health),
 				listing(hunger), listing(thirsty), listing(insidethisplace), told.
 
 loads(FileName) :- retractall(player_pos(_,_)), retractall(bag(_)), retractall(health(_)),
@@ -613,12 +617,13 @@ loads(FileName) :- retractall(player_pos(_,_)), retractall(bag(_)), retractall(h
 quit :- write('Alice gives up to the Zombies. Game over.'), halt.
 
 /* Kalkulasi serangan (zombie) */
-calcbyzombiename([H|_]) :- weapon(_W),
+calcbyzombiename([_H|_]) :- weapon(_W),
 														islistkosong(_W),
 														writeln('You can\'t attack the enemy, Alice. You must held the weapon first'),!.
 
 calcbyzombiename([H|_]) :- zombie(H), enemypower(H, Atk),
 													 weapon(W),
+													 kills(K),
 													 \+islistkosong(W),
 													 retract(weapon(_W)),
 													 asserta(weapon([])),
@@ -632,6 +637,9 @@ calcbyzombiename([H|_]) :- zombie(H), enemypower(H, Atk),
 													 writeln('Enemy is down!'),
 													 write('Your HP is '), writeln(_NewHP),
 													 retract(health(_HP)),
+													 retract(kills(_K)),
+													 NewK is K + 1,
+													 asserta(kills(NewK)),
 													 asserta(health(_NewHP)), !.
 
 calcbyzombiename([H|_]) :-  zombie(H), enemypower(H, Atk),
