@@ -1,6 +1,5 @@
-/* Nama File : K02_Alice_vs_Umbrella.pl */
+/* Nama File : K02_G_07.pl */
 /* Alice vs The Umbrella Corperation */
-/* Tugas Besar IF2121 Logika Informatika */
 
 /*
 Anggota kelompok :
@@ -11,17 +10,18 @@ Anggota kelompok :
 */
 
 /*Dynamics fact disini itu fact bisa berubah2 seiring berjalan game
-*Untuk player position ,look, dll yang berhubungan sama map itu belum bisa dibikin
+*Untuk player position ,look, dll yang berhubungan sama maps itu belum bisa dibuat
+* Catatan : win/ 1 untuk menentukan siapa pemenang game ini, (1 = Alice, 0 = Umbrella Corp, -1 = Belum ada yang menang/Game masih berjalan)
 */
 :- use_module(library(random)).
-:- dynamic(win/1, player_pos/2, item/2, insidethisplace/4, ingamestate/1, bag/1, health/1, hunger/1, thirsty/1, weapon/1, enemypower/2, countstep/1).
+:- dynamic(kills/1 ,win/1, player_pos/2, item/2, insidethisplace/4, ingamestate/1, bag/1, health/1, hunger/1, thirsty/1, weapon/1, enemypower/2, countstep/1).
 
 /*Inisialisasi game
 * 0 = belum mulai permainan atau udah mati, 1 = hidup atau sedang bermain
 */
 ingamestate(0).
 
-/***** Deklarasi Fakta *****/
+/* Deklarasi Fakta */
 place(0, openfield).
 place(1, openfield).
 place(2, garden).
@@ -40,6 +40,16 @@ zombie(farfarello).
 zombie(malacoda).
 zombie(cerberus).
 zombie(chimera).
+isfood(meat).
+isfood(banana).
+isfood(pig).
+isweapon(axe).
+isweapon(spear).
+isweapon(sword).
+isdrink(waterpouch).
+isdrink(honey).
+ismedicine(medicine).
+ismedicine(bandage).
 
 /*locationName
 * Perhitungan : x mod 5 = 0<=a<=4 , y mod 4 = 0<=b<=3,0<= a+b <=7
@@ -58,14 +68,14 @@ game_loop   :- ingamestate(1),
 /* Path (from - to)*/
 path(Xa,Ya,east,Xb,Yb) :- Xa < 10, Xb is Xa + 1, Yb is Ya,!.
 path(Xa,Ya,west,Xb,Yb) :- Xa >= 1, Xb is Xa - 1, Yb is Ya,!.
-path(Xa,Ya,north,Xb,Yb) :- Ya < 20, Yb is Ya - 1, Xb is Xa,!.
-path(Xa,Ya,south,Xb,Yb) :- Ya >= 1, Yb is Ya + 1, Xb is Xa,!.
+path(Xa,Ya,north,Xb,Yb) :- Ya >= 1 , Yb is Ya - 1, Xb is Xa,!.
+path(Xa,Ya,south,Xb,Yb) :- Ya < 20 , Yb is Ya + 1, Xb is Xa,!.
 
 /* Basic rules */
-checkWinner :- win(X), X == 0, writeln('Oh no! Alice is exhausted and cannot move again!.. White Kingdom is fully occupied by Umbrella corp, Game over!.'),!.
+checkWinner :- win(X), X == 0, writeln('Oh no! Alice is exhausted and can\'t move again!.. White Kingdom is fully occupied by Umbrella corp, Game over!.'),!.
 checkWinner :- win(X), X == 1, writeln('Hooray!!.. Good job, Alice! All the zombies are down.'),!,halt.
 writeifenemynearby([]) :- true,!.
-writeifenemynearby(List) :- isEnemy(List), write(' and there is an eneny here..Watch out!!').
+writeifenemynearby(List) :- isEnemy(List), write(' and there is an enemy here.. Watch out!!').
 isdefined(X,Y) :- X>=0, X<11, Y>=0, Y<21.
 islistkosong([]).
 isEnemy([]).
@@ -87,8 +97,8 @@ run(north) :- north, nl,!.
 run(east) :- east, nl,!.
 run(south) :- south, nl,!.
 run(west) :- west, nl,!.
-run(look) :- look, nl, !. /* */
-run(help) :- help, nl, !. /* */
+run(look) :- look, nl, !. /* predikat untuk melihat posisi sekitar */
+run(help) :- help, nl, !. /* predikat yang memberikan petunjuk game*/
 run(quit) :- quit, nl, !. /* predikat yang menyebabkan game berakhir */
 run(maps) :- maps, nl,!.
 run(take(Obj)) :- take(Obj), nl, !.
@@ -189,15 +199,15 @@ start:- writeln('Welcome to Alice vs Umbrella Corp.!'),
 		asserta(enemypower(uberlicker,14)),
 		asserta(enemypower(fenrir,23)),
 		asserta(enemypower(scagdead,32)),
-		asserta(enemypower(aceleozzo,6)),
+		asserta(enemypower(aculeozzo,6)),
 		asserta(enemypower(farfarello,20)),
 		asserta(enemypower(malacoda, 23)),
 		asserta(enemypower(cerberus,15)),
 		asserta(enemypower(chimera,20)),
 		asserta(hunger(100)),
-		asserta(thirsty(2)),
+		asserta(thirsty(100)),
 		asserta(weapon([])),
-		asserta(bag([])),
+		asserta(bag([axe])),
 		asserta(item(lake,[waterpouch, meat, axe])),
 		asserta(item(openfield,[])),
 		asserta(item(armory,[sword, medicine])),
@@ -206,6 +216,9 @@ start:- writeln('Welcome to Alice vs Umbrella Corp.!'),
 		asserta(item(cave,[bandage,spear])),
 		init_dynamic_facts(0,0),
 		init_zombies,
+		retract(insidethisplace(X,Y,_AddRadar,_EL)),
+		append([radar], _AddRadar, _AddRadar2),
+		asserta(insidethisplace(X,Y,_AddRadar2,_EL)),
 		retract(ingamestate(_)),
 		asserta(ingamestate(1)),
 		game_loop.
@@ -226,38 +239,38 @@ restartgame :-
 
 prio(X,Y) :- \+isdefined(X,Y),
 							write('#'),!.
-prio(X,Y) :- insidethisplace(X,Y,List,EList), \+islistkosong(EList), isEnemy(EList),
+prio(X,Y) :- insidethisplace(X,Y,_,EList), \+islistkosong(EList), isEnemy(EList),
   						write('E'),!.
-prio(X,Y) :-insidethisplace(X,Y,List,EList) , islistkosong(List), player_pos(M,N),
+prio(X,Y) :-insidethisplace(X,Y,List,_) , islistkosong(List), player_pos(M,N),
 							M == X, N == Y,
 							write('A'),!.
-prio(X,Y) :-insidethisplace(X,Y,List,EList) , islistkosong(List),
+prio(X,Y) :-insidethisplace(X,Y,List,_) , islistkosong(List),
 							write('-'),!.
-prio(X,Y) :-insidethisplace(X,Y,List,EList),
+prio(X,Y) :-insidethisplace(X,Y,List,_),
 						isMember(medicine,List),
 						write('M'),!.
-prio(X,Y) :-insidethisplace(X,Y,List,EList),
+prio(X,Y) :-insidethisplace(X,Y,List,_),
 							isMember(bandage,List),
 						write('M'),!.
-prio(X,Y) :- insidethisplace(X,Y,List,EList),
+prio(X,Y) :- insidethisplace(X,Y,List,_),
 							isMember(meat,List),
 						write('F'),!.
-prio(X,Y) :- insidethisplace(X,Y,List,EList),
+prio(X,Y) :- insidethisplace(X,Y,List,_),
 						isMember(banana,List),
 						write('F'),!.
-prio(X,Y) :- insidethisplace(X,Y,List,EList),
+prio(X,Y) :- insidethisplace(X,Y,List,_),
 							isMember(pig,List),
 						write('F'),!.
-prio(X,Y) :- insidethisplace(X,Y,List,EList),
+prio(X,Y) :- insidethisplace(X,Y,List,_),
 						isMember(waterpouch,List),
 						write('W'),!.
-prio(X,Y) :- insidethisplace(X,Y,List,EList),
+prio(X,Y) :- insidethisplace(X,Y,List,_),
 						isMember(honey,List),
 						write('W'),!.
-prio(X,Y) :- insidethisplace(X,Y,List,EList),
+prio(X,Y) :- insidethisplace(X,Y,List,_),
 						isMember(spear,List),
 						write('@'),!.
-prio(X,Y) :- insidethisplace(X,Y,List,EList),
+prio(X,Y) :- insidethisplace(X,Y,List,_),
 						isMember(axe,List),
 						write('@'),!.
 prio(X,Y) :- player_pos(A,B),
@@ -265,27 +278,21 @@ prio(X,Y) :- player_pos(A,B),
 						Y==B,
 						write('A').
 
-printmap(X,Y) :- Y == 21 , nl, player_pos(R,T), write('Your location is ('), write(R), write(',') , write(T), writeln('). Relative to the corner left which is (0,0)'), true.
+printmap(_,Y) :- Y == 21 , nl, player_pos(R,T), write('Your location is ('), write(R), write(',') , write(T), writeln('). Relative to the bottom corner left which is (0,0)'), true.
 
 printmap(X,Y) :- X < 11, Y < 21,
-				write(' '), prio(X,Y), write(' '),
-				M is X+1, N is Y,
-				printmap(M,N).
+						write(' '), prio(X,Y), write(' '),
+						M is X+1,
+						N is Y,
+						printmap(M,N).
+printmap(X,Y) :-
+						X == 10, Y < 21,
+						write(' '), prio(X,Y) , nl,
+						M is 0,
+						N is Y+1,
+						printmap(M,N).
 
-printmap(X,Y) :- X == 10, Y < 21,
-				write(' '), prio(X,Y) , nl,
-				M is 0, N is Y+1,
-				printmap(M,N).
-
-/* 		asserta(item(lake,[waterpouch, meat, axe])),
-		asserta(item(openfield,[])),
-		asserta(item(armory,[sword, medicine])),
-		asserta(item(garden,[hoe,banana])),
-		asserta(item(forest,[pig,honey])),
-		asserta(item(cave,[bandage,spear])), */
-
-		/* Skala prioritas penampilan peta: Enemy > Medicine > Food > Water > Weapon >
-pemain. */
+/* Skala prioritas penampilan peta: Enemy > Medicine > Food > Water > Weapon > Player. */
 
 look :- ingamestate(1),
 		player_pos(X, Y),
@@ -321,7 +328,7 @@ help :- writeln('These are the available commands:'),
 		writeln('- attack.         = attack enemy that accross your path.'),
 		writeln('- status.         = display Alice status.'),
 		writeln('- save(FileName). = save your game.'),
-		writeln('- load(FileName). = load previously saved game.'),
+		writeln('- loads(FileName). = 	load previously saved game.'),
 		writeln('- quit.           = quit the game.'),
 		writeln('Legends : '),
 		writeln('W = Water'),
@@ -333,15 +340,154 @@ help :- writeln('These are the available commands:'),
 		writeln('# = Inaccesible'),
 		writeln('- = Accesible').
 
-maps :-		printmap(0,0).
+maps :-	ingamestate(1),bag(ListItem), isMember(radar, ListItem),printmap(0,0),!.
+maps :- ingamestate(1),bag(ListItem),\+isMember(radar,ListItem),writeln('There is no radar in your bag. Try to find the radar to see full maps!'),!.
 
 take(Obj) :- write('').
 
 drop(Obj) :- write('').
 
-use(Obj) :- write('').
+use(Obj) :- bag(BagList),
+						isfood(Obj),
+						isMember(Obj, BagList),
+						hunger(H),
+						H == 100,nl,
+						writeln('Alice : Hmmm, I can\'t take another bite'),!.
 
-attack	:- write('').
+use(Obj) :- bag(BagList),
+						isfood(Obj),
+						isMember(Obj, BagList),
+						hunger(H),
+						H < 100,
+						_NewH is H + 2,
+						_NewH > 100,
+						delElmt(Obj, BagList, NBagList),
+						retract(hunger(_OldH)),
+						retract(bag(_B)),
+						asserta(bag(NBagList)),
+						asserta(hunger(100)),nl,
+						write('Alice eats '), write(Obj), nl,
+						writeln('Yummyy! :)'),!.
+
+use(Obj) :- bag(BagList),
+						isfood(Obj),
+						isMember(Obj, BagList),
+						hunger(H),
+						H < 100,
+						_NewH is H + 2,
+						delElmt(Obj, BagList, NBagList),
+						retract(hunger(_OldH)),
+						retract(bag(_B)),
+						asserta(bag(NBagList)),
+						asserta(hunger(_NewH)),nl,
+						write('Alice eats '), write(Obj), nl,
+						writeln('Yummyy! :)'),!.
+
+use(Obj) :- bag(BagList),
+						isdrink(Obj),
+						isMember(Obj, BagList),
+						thirsty(T),
+						T == 100,nl,
+						writeln('Alice : No, i\'am not thirsty'),!.
+
+use(Obj) :- bag(BagList),
+						isdrink(Obj),
+						isMember(Obj, BagList),
+						thirsty(T),
+						T < 100,
+						_NewT is T + 2,
+						_NewT > 100,
+						delElmt(Obj, BagList, NBagList),
+						retract(thirsty(_OldT)),
+						retract(bag(_B)),
+						asserta(bag(NBagList)),
+						asserta(thirsty(100)),nl,
+						write('Alice drinks '), write(Obj), nl,
+						writeln('Sluuurrpp! :)'),!.
+
+use(Obj) :- bag(BagList),
+						isdrink(Obj),
+						isMember(Obj, BagList),
+						thirsty(T),
+						T < 100,
+						_NewT is T + 2,
+						delElmt(Obj, BagList, NBagList),
+						retract(thirsty(_OldT)),
+						retract(bag(_B)),
+						asserta(bag(NBagList)),
+						asserta(thirsty(_NewT)),nl,
+						write('Alice drinks '), write(Obj), nl,
+						writeln('Sluuurrpp! :)'),!.
+
+use(Obj) :- bag(BagList),
+						ismedicine(Obj),
+						isMember(Obj, BagList),
+						health(H),
+						H == 100,nl,
+						writeln('Alice : No, I don\'t need this now'),!.
+
+use(Obj) :- bag(BagList),
+						ismedicine(Obj),
+						isMember(Obj, BagList),
+						health(H),
+						H < 100,
+						_NewH is H + 4,
+						_NewH > 100,
+						delElmt(Obj, BagList, NBagList),
+						retract(health(_OldH)),
+						retract(bag(_B)),
+						asserta(bag(NBagList)),
+						asserta(health(100)),nl,
+						write('Alice use '), write(Obj), nl,
+						writeln('I\'m feel better now :)'),!.
+
+use(Obj) :- bag(BagList),
+						ismedicine(Obj),
+						isMember(Obj, BagList),
+						health(H),
+						H < 100,
+						_NewH is H + 4,
+						delElmt(Obj, BagList, NBagList),
+						retract(health(_OldH)),
+						retract(bag(_B)),
+						asserta(bag(NBagList)),
+						asserta(health(_NewH)),nl,
+						write('Alice use '), write(Obj), nl,
+						writeln('I\'m feel better now :)'),!.
+
+use(Obj) :- bag(BagList),
+						isweapon(Obj),
+						isMember(Obj, BagList),
+						weapon(Weapon),
+						islistkosong(Weapon),
+						retract(weapon(_)),
+						delElmt(Obj, BagList, NBagList),
+						retract(bag(_B)),
+						append([Obj], Weapon, _NewW),
+						asserta(bag(NBagList)),
+						asserta(weapon(_NewW)),nl,
+						write('Now, you will use '), write(Obj), writeln(' to protect yourself from the zombie.'),!.
+
+use(Obj) :- isweapon(Obj),
+						weapon(W),
+						\+islistkosong(W),nl,
+						writeln('You\'re already use weapon in your hand'),!.
+
+use(Obj) :- bag(BagList),
+						\+isMember(Obj, BagList),nl,
+					 write(Obj), writeln(' isn\'t available in your bag'),!.
+
+attack	:- ingamestate(1),
+					 player_pos(X,Y),
+					 insidethisplace(X,Y,_,EList),
+					 isEnemy(EList),
+					 calcbyzombiename(EList),!.
+
+attack :- ingamestate(1),
+					 player_pos(X,Y),
+					 insidethisplace(X,Y,_,EList),
+					 \+isEnemy(EList),
+					writeln('There is no enemy here. Be focus Alice! :(').
 
 status :- ingamestate(1),
 		weapon(WeaponList),
@@ -352,70 +498,47 @@ status :- ingamestate(1),
 		write('Health    = '), writeln(HP),
 		write('Hunger    = '), writeln(_H),
 		write('Thirsty   = '), writeln(T),
-		writeln('Weapon    = '), writelist(WeaponList),
+		write('Weapon    = '), writelist(WeaponList),
 		writeln('Inventory = '), writelist(BagList),!.
-		
-save(FileName) :- open(FileName,write,_Stream),
-				player_pos(X,Y),
-				write(_Stream,X), write(_Stream,'.'), nl(_Stream),
-				write(_Stream,Y), write(_Stream,'.'), nl(_Stream),
-				close(_Stream),
-				savemap(0,0,FileName).
 
-savemap(X,Y,FileName) :- Y==21, !.
-savemap(X,Y,FileName) :- X < 10, Y < 21,
-				open(FileName,append,_Stream),
-				write(_Stream,X), write(_Stream, '.'), nl(_Stream),
-				write(_Stream,Y), write(_Stream, '.'), nl(_Stream),
-				insidethisplace(X,Y,_A,_B),
-				loopListItem(_Stream,_A),
-				loopListItem(_Stream,_B),
-				nl(_Stream),
-				close(_Stream),
-				M is X+1, N is Y,
-				savemap(M,N,FileName).
-savemap(X,Y,FileName) :- X == 10, Y < 21,
-				open(FileName,append,_Stream),
-				write(_Stream,X), write(_Stream, '.'), nl(_Stream),
-				write(_Stream,Y), write(_Stream, '.'), nl(_Stream),
-				insidethisplace(X,Y,_A,_B),
-				loopListItem(_Stream,_A),
-				loopListItem(_Stream,_B),
-				nl(_Stream),
-				close(_Stream),
-				M is 0, N is Y+1,
-				savemap(M,N,FileName).
+save(FileName) :- tell(FileName), listing(player_pos), listing(bag), listing(health), 
+				listing(hunger), listing(thirsty), listing(insidethisplace), told.
 
-loopListItem(_Stream,[]) :- !.
-loopListItem(_Stream,[_H|_T]) :-
-					write(_Stream,_H),write(_Stream,'.'), nl(_Stream),
-					loopListItem(_Stream,_T).
+loads(FileName) :- retractall(player_pos(_,_)), retractall(bag(_)), retractall(health(_)),
+				retractall(hunger(_)), retractall(thirsty(_)), retractall(insidethisplace(_,_,_,_)), [FileName].
 
-loads(FileName) :- open(FileName,read,_Stream),
-					read(_Stream, X),
-					read(_Stream,Y),
-					asserta(player_pos(X,Y)),
-					close(_Stream).
+quit :- write('Alice gives up to the Zombies. Game over.'), halt.
 
-quit :- write('Alice gives up to the zombies. Game over.'), halt.
+/* Kalkulasi serangan (zombie) */
+calcbyzombiename([H|_]) :- weapon(_W),
+														islistkosong(_W),
+														writeln('You can\'t attack the enemy, Alice. You must held the weapon first'),!.
+
+calcbyzombiename([H|_]) :- zombie(H), enemypower(H, Atk),
+													 weapon(W),
+													 \+islistkosong(W),
+													 retract(weapon(_W)),
+													 asserta(weapon([])),
+													 player_pos(X,Y),
+													 retract(insidethisplace(X,Y,_A,_E)),
+													 asserta(insidethisplace(X,Y,_A,[])),
+													 health(HP),
+													 _NewHP is HP - Atk,
+													 _NewHP > 0,nl,
+													 write('You took '), write(Atk), write(' damage!. Alice attacks '), write(H), writeln(' back!'),
+													 writeln('Enemy is down!'),
+													 write('Your HP is '), writeln(_NewHP),
+													 retract(health(_HP)),
+													 asserta(health(_NewHP)), !.
+
+calcbyzombiename([H|_]) :-  zombie(H), enemypower(H, Atk),
+ 													 retract(health(_HP)),
+													 _NewHP is _HP - Atk,
+													 _NewHP < 1,
+													 retract(win(_X)),
+													 asserta(win(0)),!.
 
 /*go_to another place with direction, 1 step Hunger-=1 dan 3 step Thirsty -= 1*/
-
-go(Direction) :-
-			ingamestate(1),
-			hunger(H),
-			H == 1,
-			retract(win(_X)),
-			asserta(win(0)),!.
-
-go(Direction) :-
-			ingamestate(1),
-			thirsty(T),
-			countstep(_S),
-			_S == 2,
-			T == 1,
-			retract(win(_X)),
-			asserta(win(0)),!.
 
 go(Direction) :-
 			ingamestate(1),
@@ -426,8 +549,8 @@ go(Direction) :-
 			path(Xa,Ya, Direction,Xb,Yb),nl,
 			write('You moved to the '), writeln(Direction),
 			retract(player_pos(Xa,Ya)),
-			retract(hunger(A)),
-			retract(countstep(B)),
+			retract(hunger(__)),
+			retract(countstep(_)),
 			Ha is _H - 1,
 			_NS is _S + 1,
 			asserta(countstep(_NS)),
@@ -445,9 +568,9 @@ go(Direction) :-
 			path(Xa,Ya, Direction,Xb,Yb),nl,
 			write('You moved to the '), writeln(Direction),
 			retract(player_pos(Xa,Ya)),
-			retract(hunger(A)),
-			retract(countstep(B)),
-			retract(thirsty(C)),
+			retract(hunger(_)),
+			retract(countstep(__)),
+			retract(thirsty(___)),
 			Ta is _T - 1,
 			Ha is _H - 1,
 			_NS is 0,
@@ -460,8 +583,25 @@ go(Direction) :-
 go(Direction) :-
 			ingamestate(1),
 			player_pos(Xa,Ya),
-			\+path(Xa,Ya, Direction,Xb,Yb),
-			write('Alice, you cannot go there!. Please return to your last location!.'),!.
+			\+path(Xa,Ya, Direction,_,__),
+			write('Alice, you can\'t go there!. Please return to your last location!.'),!.
+
+go(_) :-
+			ingamestate(1),
+			hunger(H),
+			H == 1,
+			retract(win(_X)),
+			asserta(win(0)),!.
+
+go(_) :-
+			ingamestate(1),
+			thirsty(T),
+			countstep(_S),
+			_S == 2,
+			T == 1,
+			retract(win(_X)),
+			asserta(win(0)),!.
+
 
 go(_) :- ingamestate(1),
 			writeln('Your inputs wrong. Undefined!.'), !.
