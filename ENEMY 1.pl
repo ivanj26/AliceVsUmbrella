@@ -73,7 +73,7 @@ path(Xa,Ya,north,Xb,Yb) :- Ya >= 1 , Yb is Ya - 1, Xb is Xa,!.
 path(Xa,Ya,south,Xb,Yb) :- Ya < 20 , Yb is Ya + 1, Xb is Xa,!.
 
 /* Basic rules */
-checkWinner :- kills(X), X == 10, writeln('Hooray!!.. Good job, Alice! All the zombies are down.'),!,halt.
+checkWinner :- kills(X), X == 1, writeln('Hooray!!.. Good job, Alice! All the zombies are down.'),!,halt.
 checkWinner :- win(X), X == 0, writeln('Oh no! Alice is exhausted and can\'t move again!.. White Kingdom is fully occupied by Umbrella corp, Game over!.'),!.
 checkWinner :- win(X), X == 1, writeln('Hooray!!.. Good job, Alice! All the zombies are down.'),!,halt.
 writeifenemynearby([]) :- true,!.
@@ -116,56 +116,10 @@ run(loads(FileName)) :- loads(FileName), nl, !.
 
 /***** Commands *****/
 init_zombies :-
-							random(0, 10, Xa), /* random ZOMB1 (position) */
-							random(0, 20, Ya),
-							random(0, 10, Xb), /* random ZOMB2 (position) */
-							random(0, 20, Yb),
-							random(0, 10, Xc), /* random ZOMB3 (position) */
-							random(0, 20, Yc),
-							random(0, 10, Xd), /* random ZOMB4 (position) */
-							random(0, 20, Yd),
-							random(0, 10, Xe), /* random ZOMB5 (position) */
-							random(0, 20, Ye),
-							random(0, 10, Xf), /* random ZOMB6 (position) */
-							random(0, 20, Yf),
-							random(0, 10, Xg), /* random ZOMB7 (position) */
-							random(0, 20, Yg),
-							random(0, 10, Xh), /* random ZOMB8 (position) */
-							random(0, 20, Yh),
-							random(0, 10, Xi), /* random ZOMB9 (position) */
-							random(0, 20, Yi),
-							random(0, 10, Xj), /* random ZOMB10 (position) */
-							random(0, 20, Yj),
-							retract(insidethisplace(Xa,Ya,_A,Lista)),
-							retract(insidethisplace(Xb,Yb,_B,Listb)),
-							retract(insidethisplace(Xc,Yc,_C,Listc)),
-							retract(insidethisplace(Xd,Yd,_D,Listd)),
-							retract(insidethisplace(Xe,Ye,_E,Liste)),
-							retract(insidethisplace(Xf,Yf,_F,Listf)),
-							retract(insidethisplace(Xg,Yg,_G,Listg)),
-							retract(insidethisplace(Xh,Yh,_H,Listh)),
-							retract(insidethisplace(Xi,Yi,_I,Listi)),
-							retract(insidethisplace(Xj,Yj,_J,Listj)),
+												player_pos(X,Y),
+							retract(insidethisplace(X,Y,_A,Lista)),
 							append([majiniundead],Lista,RLista), /*Zombie2*/
-							append([kipepo],Listb,RListb),
-							append([uberlicker],Listc,RListc),
-							append([fenrir],Listd,RListd),
-							append([scagdead],Liste,RListe),
-							append([aculeozzo],Listf,RListf),
-							append([farfarello],Listg,RListg),
-							append([malacoda],Listh,RListh),
-							append([cerberus],Listi,RListi),
-							append([chimera],Listj,RListj),
-							asserta(insidethisplace(Xa,Ya,_A,RLista)),
-							asserta(insidethisplace(Xb,Yb,_B,RListb)),
-							asserta(insidethisplace(Xc,Yc,_C,RListc)),
-							asserta(insidethisplace(Xd,Yd,_D,RListd)),
-							asserta(insidethisplace(Xe,Ye,_E,RListe)),
-							asserta(insidethisplace(Xf,Yf,_F,RListf)),
-							asserta(insidethisplace(Xg,Yg,_G,RListg)),
-							asserta(insidethisplace(Xh,Yh,_H,RListh)),
-							asserta(insidethisplace(Xi,Yi,_I,RListi)),
-							asserta(insidethisplace(Xj,Yj,_J,RListj)).
+							asserta(insidethisplace(X,Y,_A,RLista)).
 
 init_dynamic_facts(X,Y) :-
 									X == 11, Y >= 0, true.
