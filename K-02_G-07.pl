@@ -353,11 +353,11 @@ maps :- ingamestate(1),bag(ListItem),\+isMember(radar,ListItem),writeln('There i
 
 desc(Obj) :- Obj == medicine,
 			writeln('While particularly ordinary, this medicine can quickly mend even the deepest of wounds.'),
-			writeln('Ability : Restore Alice''s health back to 100 when used.').
+			writeln('Ability : Restore Alice''s health (+4HP) when used.').
 
 desc(Obj) :- Obj == bandage,
 			writeln('An essential things that aids you to survive this mess.'),
-			writeln('Ability : Restore Alice''s health back to 100 when used.').
+			writeln('Ability : Restore Alice''s health (+4HP) when used.').
 
 desc(Obj) :- Obj == banana,
 			writeln('It''s a banana, what do you expect anyway. Peel it and just eat it.'),
