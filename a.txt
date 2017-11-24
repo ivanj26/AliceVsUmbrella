@@ -1,0 +1,254 @@
+
+% file: D:/Seperayo/Kuliah/Logika Informatika/TUBES/HungerGames/K-02_G-07.pl
+
+player_pos(0, 11).
+
+% file: D:/Seperayo/Kuliah/Logika Informatika/TUBES/HungerGames/K-02_G-07.pl
+
+bag([medicine, sword, radar, axe]).
+
+% file: D:/Seperayo/Kuliah/Logika Informatika/TUBES/HungerGames/K-02_G-07.pl
+
+health(100).
+
+% file: D:/Seperayo/Kuliah/Logika Informatika/TUBES/HungerGames/K-02_G-07.pl
+
+hunger(100).
+
+% file: D:/Seperayo/Kuliah/Logika Informatika/TUBES/HungerGames/K-02_G-07.pl
+
+thirsty(100).
+
+% file: D:/Seperayo/Kuliah/Logika Informatika/TUBES/HungerGames/K-02_G-07.pl
+
+insidethisplace(0, 11, [], _).
+insidethisplace(9, 8, [], [chimera]).
+insidethisplace(1, 3, [], [cerberus]).
+insidethisplace(0, 7, [sword, medicine], [malacoda]).
+insidethisplace(3, 0, [sword, medicine], [farfarello]).
+insidethisplace(7, 10, [], [aculeozzo]).
+insidethisplace(1, 17, [hoe, banana], [scagdead]).
+insidethisplace(8, 14, [pig, honey], [fenrir]).
+insidethisplace(3, 17, [], [uberlicker]).
+insidethisplace(5, 9, [], [kipepo]).
+insidethisplace(1, 16, [], [majiniundead]).
+insidethisplace(10, 20, [], []).
+insidethisplace(10, 19, [sword, medicine], []).
+insidethisplace(10, 18, [hoe, banana], []).
+insidethisplace(10, 17, [], []).
+insidethisplace(10, 16, [], []).
+insidethisplace(10, 15, [sword, medicine], []).
+insidethisplace(10, 14, [hoe, banana], []).
+insidethisplace(10, 13, [], []).
+insidethisplace(10, 12, [], []).
+insidethisplace(10, 11, [sword, medicine], []).
+insidethisplace(10, 10, [hoe, banana], []).
+insidethisplace(10, 9, [], []).
+insidethisplace(10, 8, [], []).
+insidethisplace(10, 7, [sword, medicine], []).
+insidethisplace(10, 6, [hoe, banana], []).
+insidethisplace(10, 5, [], []).
+insidethisplace(10, 4, [], []).
+insidethisplace(10, 3, [sword, medicine], []).
+insidethisplace(10, 2, [hoe, banana], []).
+insidethisplace(10, 1, [], []).
+insidethisplace(10, 0, [], []).
+insidethisplace(9, 20, [], []).
+insidethisplace(9, 19, [waterpouch, meat, axe], []).
+insidethisplace(9, 18, [bandage, spear], []).
+insidethisplace(9, 17, [pig, honey], []).
+insidethisplace(9, 16, [], []).
+insidethisplace(9, 15, [waterpouch, meat, axe], []).
+insidethisplace(9, 14, [bandage, spear], []).
+insidethisplace(9, 13, [pig, honey], []).
+insidethisplace(9, 12, [], []).
+insidethisplace(9, 11, [waterpouch, meat, axe], []).
+insidethisplace(9, 10, [bandage, spear], []).
+insidethisplace(9, 9, [pig, honey], []).
+insidethisplace(9, 7, [waterpouch, meat, axe], []).
+insidethisplace(9, 6, [bandage, spear], []).
+insidethisplace(9, 5, [pig, honey], []).
+insidethisplace(9, 4, [], []).
+insidethisplace(9, 3, [waterpouch, meat, axe], []).
+insidethisplace(9, 2, [bandage, spear], []).
+insidethisplace(9, 1, [pig, honey], []).
+insidethisplace(9, 0, [], []).
+insidethisplace(8, 20, [sword, medicine], []).
+insidethisplace(8, 19, [bandage, spear], []).
+insidethisplace(8, 18, [pig, honey], []).
+insidethisplace(8, 17, [], []).
+insidethisplace(8, 16, [sword, medicine], []).
+insidethisplace(8, 15, [bandage, spear], []).
+insidethisplace(8, 13, [], []).
+insidethisplace(8, 12, [sword, medicine], []).
+insidethisplace(8, 11, [bandage, spear], []).
+insidethisplace(8, 10, [pig, honey], []).
+insidethisplace(8, 9, [], []).
+insidethisplace(8, 8, [sword, medicine], []).
+insidethisplace(8, 7, [bandage, spear], []).
+insidethisplace(8, 6, [pig, honey], []).
+insidethisplace(8, 5, [], []).
+insidethisplace(8, 4, [sword, medicine], []).
+insidethisplace(8, 3, [bandage, spear], []).
+insidethisplace(8, 2, [pig, honey], []).
+insidethisplace(8, 1, [], []).
+insidethisplace(8, 0, [sword, medicine], []).
+insidethisplace(7, 20, [hoe, banana], []).
+insidethisplace(7, 19, [pig, honey], []).
+insidethisplace(7, 18, [], []).
+insidethisplace(7, 17, [sword, medicine], []).
+insidethisplace(7, 16, [hoe, banana], []).
+insidethisplace(7, 15, [pig, honey], []).
+insidethisplace(7, 14, [], []).
+insidethisplace(7, 13, [sword, medicine], []).
+insidethisplace(7, 12, [hoe, banana], []).
+insidethisplace(7, 11, [pig, honey], []).
+insidethisplace(7, 9, [sword, medicine], []).
+insidethisplace(7, 8, [hoe, banana], []).
+insidethisplace(7, 7, [pig, honey], []).
+insidethisplace(7, 6, [], []).
+insidethisplace(7, 5, [sword, medicine], []).
+insidethisplace(7, 4, [hoe, banana], []).
+insidethisplace(7, 3, [pig, honey], []).
+insidethisplace(7, 2, [], []).
+insidethisplace(7, 1, [sword, medicine], []).
+insidethisplace(7, 0, [hoe, banana], []).
+insidethisplace(6, 20, [], []).
+insidethisplace(6, 19, [], []).
+insidethisplace(6, 18, [sword, medicine], []).
+insidethisplace(6, 17, [hoe, banana], []).
+insidethisplace(6, 16, [], []).
+insidethisplace(6, 15, [], []).
+insidethisplace(6, 14, [sword, medicine], []).
+insidethisplace(6, 13, [hoe, banana], []).
+insidethisplace(6, 12, [], []).
+insidethisplace(6, 11, [], []).
+insidethisplace(6, 10, [sword, medicine], []).
+insidethisplace(6, 9, [hoe, banana], []).
+insidethisplace(6, 8, [], []).
+insidethisplace(6, 7, [], []).
+insidethisplace(6, 6, [sword, medicine], []).
+insidethisplace(6, 5, [hoe, banana], []).
+insidethisplace(6, 4, [], []).
+insidethisplace(6, 3, [], []).
+insidethisplace(6, 2, [sword, medicine], []).
+insidethisplace(6, 1, [hoe, banana], []).
+insidethisplace(6, 0, [], []).
+insidethisplace(5, 20, [], []).
+insidethisplace(5, 19, [sword, medicine], []).
+insidethisplace(5, 18, [hoe, banana], []).
+insidethisplace(5, 17, [], []).
+insidethisplace(5, 16, [], []).
+insidethisplace(5, 15, [sword, medicine], []).
+insidethisplace(5, 14, [hoe, banana], []).
+insidethisplace(5, 13, [], []).
+insidethisplace(5, 12, [], []).
+insidethisplace(5, 11, [sword, medicine], []).
+insidethisplace(5, 10, [hoe, banana], []).
+insidethisplace(5, 8, [], []).
+insidethisplace(5, 7, [sword, medicine], []).
+insidethisplace(5, 6, [hoe, banana], []).
+insidethisplace(5, 5, [], []).
+insidethisplace(5, 4, [], []).
+insidethisplace(5, 3, [sword, medicine], []).
+insidethisplace(5, 2, [hoe, banana], []).
+insidethisplace(5, 1, [], []).
+insidethisplace(5, 0, [], []).
+insidethisplace(4, 20, [], []).
+insidethisplace(4, 19, [waterpouch, meat, axe], []).
+insidethisplace(4, 18, [bandage, spear], []).
+insidethisplace(4, 17, [pig, honey], []).
+insidethisplace(4, 16, [], []).
+insidethisplace(4, 15, [waterpouch, meat, axe], []).
+insidethisplace(4, 14, [bandage, spear], []).
+insidethisplace(4, 13, [pig, honey], []).
+insidethisplace(4, 12, [], []).
+insidethisplace(4, 11, [waterpouch, meat, axe], []).
+insidethisplace(4, 10, [bandage, spear], []).
+insidethisplace(4, 9, [pig, honey], []).
+insidethisplace(4, 8, [], []).
+insidethisplace(4, 7, [waterpouch, meat, axe], []).
+insidethisplace(4, 6, [bandage, spear], []).
+insidethisplace(4, 5, [pig, honey], []).
+insidethisplace(4, 4, [], []).
+insidethisplace(4, 3, [waterpouch, meat, axe], []).
+insidethisplace(4, 2, [bandage, spear], []).
+insidethisplace(4, 1, [pig, honey], []).
+insidethisplace(4, 0, [], []).
+insidethisplace(3, 20, [sword, medicine], []).
+insidethisplace(3, 19, [bandage, spear], []).
+insidethisplace(3, 18, [pig, honey], []).
+insidethisplace(3, 16, [sword, medicine], []).
+insidethisplace(3, 15, [bandage, spear], []).
+insidethisplace(3, 14, [pig, honey], []).
+insidethisplace(3, 13, [], []).
+insidethisplace(3, 12, [sword, medicine], []).
+insidethisplace(3, 11, [bandage, spear], []).
+insidethisplace(3, 10, [pig, honey], []).
+insidethisplace(3, 9, [], []).
+insidethisplace(3, 8, [sword, medicine], []).
+insidethisplace(3, 7, [bandage, spear], []).
+insidethisplace(3, 6, [pig, honey], []).
+insidethisplace(3, 5, [], []).
+insidethisplace(3, 4, [sword, medicine], []).
+insidethisplace(3, 3, [bandage, spear], []).
+insidethisplace(3, 2, [pig, honey], []).
+insidethisplace(3, 1, [], []).
+insidethisplace(2, 20, [hoe, banana], []).
+insidethisplace(2, 19, [pig, honey], []).
+insidethisplace(2, 18, [], []).
+insidethisplace(2, 17, [sword, medicine], []).
+insidethisplace(2, 16, [hoe, banana], []).
+insidethisplace(2, 15, [pig, honey], []).
+insidethisplace(2, 14, [], []).
+insidethisplace(2, 13, [sword, medicine], []).
+insidethisplace(2, 12, [hoe, banana], []).
+insidethisplace(2, 11, [pig, honey], []).
+insidethisplace(2, 10, [], []).
+insidethisplace(2, 9, [sword, medicine], []).
+insidethisplace(2, 8, [hoe, banana], []).
+insidethisplace(2, 7, [pig, honey], []).
+insidethisplace(2, 6, [], []).
+insidethisplace(2, 5, [sword, medicine], []).
+insidethisplace(2, 4, [hoe, banana], []).
+insidethisplace(2, 3, [pig, honey], []).
+insidethisplace(2, 2, [], []).
+insidethisplace(2, 1, [sword, medicine], []).
+insidethisplace(2, 0, [hoe, banana], []).
+insidethisplace(1, 20, [], []).
+insidethisplace(1, 19, [], []).
+insidethisplace(1, 18, [sword, medicine], []).
+insidethisplace(1, 15, [], []).
+insidethisplace(1, 14, [sword, medicine], []).
+insidethisplace(1, 13, [hoe, banana], []).
+insidethisplace(1, 12, [], []).
+insidethisplace(1, 11, [], []).
+insidethisplace(1, 10, [sword, medicine], []).
+insidethisplace(1, 9, [hoe, banana], []).
+insidethisplace(1, 8, [], []).
+insidethisplace(1, 7, [], []).
+insidethisplace(1, 6, [sword, medicine], []).
+insidethisplace(1, 5, [hoe, banana], []).
+insidethisplace(1, 4, [], []).
+insidethisplace(1, 2, [sword, medicine], []).
+insidethisplace(1, 1, [hoe, banana], []).
+insidethisplace(1, 0, [], []).
+insidethisplace(0, 20, [], []).
+insidethisplace(0, 19, [sword, medicine], []).
+insidethisplace(0, 18, [hoe, banana], []).
+insidethisplace(0, 17, [], []).
+insidethisplace(0, 16, [], []).
+insidethisplace(0, 15, [sword, medicine], []).
+insidethisplace(0, 14, [hoe, banana], []).
+insidethisplace(0, 13, [], []).
+insidethisplace(0, 12, [], []).
+insidethisplace(0, 10, [hoe, banana], []).
+insidethisplace(0, 9, [], []).
+insidethisplace(0, 8, [], []).
+insidethisplace(0, 6, [hoe, banana], []).
+insidethisplace(0, 5, [], []).
+insidethisplace(0, 4, [], []).
+insidethisplace(0, 3, [sword, medicine], []).
+insidethisplace(0, 2, [hoe, banana], []).
+insidethisplace(0, 1, [], []).
+insidethisplace(0, 0, [], []).

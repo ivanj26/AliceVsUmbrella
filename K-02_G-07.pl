@@ -560,7 +560,7 @@ use(Obj) :- bag(BagList),
 						asserta(bag(NBagList)),
 						asserta(health(_NewH)),nl,
 						write('Alice use '), write(Obj), nl,
-						writeln('I\'m feel better now :)'),!.
+						writeln('I feel better now :)'),!.
 
 use(Obj) :- bag(BagList),
 						isweapon(Obj),
