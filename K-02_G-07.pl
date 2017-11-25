@@ -3,10 +3,10 @@
 
 /*
 Anggota kelompok :
-	1.
-	2.
-	3.
-	4.
+	1. Ivan Jonathan			13516
+	2. Seperayo					13516
+	3. Muhammad Alfian Rasyidin	13516104
+	4. Hafizh Budiman			13516
 */
 
 /*Dynamics fact disini itu fact bisa berubah2 seiring berjalan game
@@ -534,13 +534,13 @@ use(Obj) :- bag(BagList),
 						isMember(Obj, BagList),
 						health(H),
 						H < 100,
-						_NewH is H + 4,
+						_NewH is 100,
 						_NewH > 100,
 						delElmt(Obj, BagList, NBagList),
 						retract(health(_OldH)),
 						retract(bag(_B)),
 						asserta(bag(NBagList)),
-						asserta(health(100)),nl,
+						asserta(health(_NewH)),nl,
 						write('Alice uses '), write(Obj), nl,
 						writeln('I feel better now :)'),!.
 
@@ -556,7 +556,7 @@ use(Obj) :- bag(BagList),
 						asserta(bag(NBagList)),
 						asserta(health(_NewH)),nl,
 						write('Alice use '), write(Obj), nl,
-						writeln('I\'m feel better now :)'),!.
+						writeln('I feel better now :)'),!.
 
 use(Obj) :- bag(BagList),
 						isweapon(Obj),
@@ -618,28 +618,28 @@ calcbyzombiename([H|_]) :- weapon(_W),
 														writeln('You can\'t attack the enemy, Alice. You must held the weapon first'),!.
 
 calcbyzombiename([H|_]) :- zombie(H), enemypower(H, Atk),
-													 weapon(W),
-													 \+islistkosong(W),
-													 retract(weapon(_W)),
-													 asserta(weapon([])),
-													 player_pos(X,Y),
-													 retract(insidethisplace(X,Y,_A,_E)),
-													 asserta(insidethisplace(X,Y,_A,[])),
-													 health(HP),
-													 _NewHP is HP - Atk,
-													 _NewHP > 0,nl,
-													 write('You took '), write(Atk), write(' damage!. Alice attacks '), write(H), writeln(' back!'),
-													 writeln('Enemy is down!'),
-													 write('Your HP is '), writeln(_NewHP),
-													 retract(health(_HP)),
-													 asserta(health(_NewHP)), !.
+						 weapon(W),
+						 \+islistkosong(W),
+						 retract(weapon(_W)),
+						 asserta(weapon([])),
+						 player_pos(X,Y),
+						 retract(insidethisplace(X,Y,_A,_E)),
+						 asserta(insidethisplace(X,Y,_A,[])),
+						 health(HP),
+						 _NewHP is HP - Atk,
+						 _NewHP > 0,nl,
+						 write('You took '), write(Atk), write(' damage!. Alice attacks '), write(H), writeln(' back!'),
+						 writeln('Enemy is down!'),
+						 write('Your HP is '), writeln(_NewHP),
+						 retract(health(_HP)),
+						 asserta(health(_NewHP)), !.
 
 calcbyzombiename([H|_]) :-  zombie(H), enemypower(H, Atk),
- 													 retract(health(_HP)),
-													 _NewHP is _HP - Atk,
-													 _NewHP < 1,
-													 retract(win(_X)),
-													 asserta(win(0)),!.
+						 retract(health(_HP)),
+						 _NewHP is _HP - Atk,
+						 _NewHP < 1,
+						 retract(win(_X)),
+						 asserta(win(0)),!.
 
 /*go_to another place with direction, 1 step Hunger-=1 dan 3 step Thirsty -= 1*/
 
