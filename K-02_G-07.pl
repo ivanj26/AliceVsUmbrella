@@ -345,7 +345,7 @@ help :- writeln(' _______ ___     ___ _______ _______     __   __ _______     __
 		writeln('- status.         = display Alice status.'),
 		writeln('- save(FileName). = save your game.'),
 		writeln('- loads(FileName).= load previously saved game.'),
-		writeln('- quit.     = quit the game.'),
+		writeln('- quit.           = quit the game.'),
 		writeln('Legends : '),
 		writeln('W = Water'),
 		writeln('M = Medicine'),
