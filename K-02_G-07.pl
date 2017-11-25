@@ -113,6 +113,8 @@ run(attack) :- attack, nl, !.
 run(status) :- status, nl, !.
 run(save(FileName)) :- save(FileName), nl, !.
 run(loads(FileName)) :- loads(FileName), nl, !.
+run(takeall) :- takeall, nl,!.
+run(dropall) :- dropall, nl,!.
 
 /***** Commands *****/
 init_zombies :-
@@ -197,7 +199,7 @@ start:- writeln('Welcome to Alice vs Umbrella Corp.!'),
 		asserta(player_pos(X,Y)),
 		asserta(health(100)),
 		asserta(win(-1)),
-		asserta(countstep(0)),
+		asserta(countstep(2)),
 		asserta(enemypower(majiniundead,30)),
 		asserta(enemypower(kipepo,10)),
 		asserta(enemypower(uberlicker,14)),
@@ -246,7 +248,7 @@ restartgame :-
 
 prio(X,Y) :- \+isdefined(X,Y),
 							write('#'),!.
-prio(X,Y) :- insidethisplace(X,Y,_,EList), \+islistkosong(EList), isEnemy(EList),
+prio(X,Y) :- insidethisplace(X,Y,_,EList), EList \= [],
   						write('E'),!.
 prio(X,Y) :-insidethisplace(X,Y,List,_) , islistkosong(List), player_pos(M,N),
 							M == X, N == Y,
@@ -391,8 +393,119 @@ desc(Obj) :- Obj == honey,
 			writeln('Sweet.'),
 			writeln('Ability : Gain 2 hunger points when consumed.').
 
+desc(Obj) :- Obj == hoe,
+			writeln('Not the hoe you thought of.'),
+			writeln('Ability : Bury enemy down with one hit.').
+
 desc(Obj) :- Obj == radar,
 			writeln('Grants the ability to see every items and zombies').
+
+/* 	Menghitung damage yang diterima saat otomatis diserang musuh
+	karena berada dalam petak yang sama */
+countPower([],0).
+countPower([H|T],X) :- zombie(H), enemypower(H,ATK),
+                        countPower(T,X1),
+                        X is X1 + ATK.
+
+/* 	Jika tidak melakukan pergerakan atau attack, dan di dalam kotak yang sama
+	dengan sebuah atau beberapa zombie, maka akan mendapatkan serangan */
+
+isAttacked(EList) :- isEnemy(EList),
+						countPower(EList,Dmg),
+						Dmg == 0.
+isAttacked(EList) :- isEnemy(EList),
+						countPower(EList,Dmg),
+						health(_HP),
+						Dmg\=0,
+						_newHP is _HP - Dmg,
+						_newHP > 0,
+						retract(health(_)),
+						asserta(health(_newHP)),
+						write('You took '),write(Dmg),write(' damage for not moving or attacking the zombie.'),nl.
+isAttacked(EList) :- isEnemy(EList),
+						countPower(EList,Dmg),
+						health(_HP),
+						_newHP is _HP - Dmg,
+						_newHP < 1,
+						retract(win(_)),
+						asserta(win(0)).
+
+/* membuat enemy bergerak random */
+
+moverand(0,1,0).
+moverand(1,0,1).
+moverand(2,-1,0).
+moverand(3,0,-1).
+moverand(4,1,0).
+moverand(5,0,1).
+moverand(6,-1,0).
+moverand(7,0,-1).
+
+/* jika dikotak tidak ada enemy maka di skip */
+randomEnemy(X,Y) :- insidethisplace(X,Y,_,EList),
+						EList == [],
+						X < 11, Y < 21,
+						M is X + 1, N is Y,
+						randomEnemy(M,N).
+
+randomEnemy(X,Y) :- insidethisplace(X,Y,_,EList),
+						EList == [],
+						X == 10, Y < 21,
+						M is 0, N is Y + 1,
+						randomEnemy(M,N).
+
+/* jika enemy berada dalam petak yang sama dengan pemain, maka tidak di random */
+randomEnemy(X,Y) :- player_pos(X,Y),
+						insidethisplace(X,Y,List,EList),
+						X < 11, Y < 21,
+						M is X + 1, N is Y,
+						retract(insidethisplace(X,Y,List,EList)),
+						asserta(insidethisplace(X,Y,List,EList)),
+						randomEnemy(M,N).
+
+randomEnemy(X,Y) :- player_pos(X,Y),
+						insidethisplace(X,Y,List,EList),
+						X == 10, Y < 21,
+						M is 0, N is Y + 1,
+						retract(insidethisplace(X,Y,List,EList)),
+						asserta(insidethisplace(X,Y,List,EList)),
+						randomEnemy(M,N).
+
+/* RANDOM! (jika di petak ada enemy, dan tidak satu petak dengan player)*/
+randomEnemy(X,Y) :- insidethisplace(X,Y,_ListN,EList),
+						EList \= [],
+						X < 11, Y < 21,
+						M is X + 1, N is Y,
+						A is X mod 5, B is Y mod 4, N is A+B, 
+						moverand(N,X1,Y1),
+						X2 is X1 + X, Y2 is Y1 + Y,
+						X2 > -1, X2 < 11, Y2 > -1, Y2 < 21,
+						insidethisplace(X2,Y2,_ListB,EL),
+						append(EList,EL,ELNew),
+						retract(insidethisplace(X,Y,_,_)),
+						retract(insidethisplace(X2,Y2,_,_)),
+						asserta(insidethisplace(X,Y,_ListN,[])),
+						asserta(insidethisplace(X2,Y2,_ListB,ELNew)),
+						randomEnemy(M,N).
+
+randomEnemy(X,Y) :- insidethisplace(X,Y,_ListN,EList),
+						EList \= [],
+						X == 10, Y < 21,
+						M is 0, N is Y + 1,
+						A is X mod 5, B is Y mod 4, N is A+B, 
+						moverand(N,X1,Y1),
+						X2 is X1 + X, Y2 is Y1 + Y,
+						X2 > -1, X2 < 11, Y2 > -1, Y2 < 21,
+						insidethisplace(X2,Y2,_ListB,EL),
+						append(EList,EL,ELNew),
+						retract(insidethisplace(X,Y,_,_)),
+						retract(insidethisplace(X2,Y2,_,_)),
+						asserta(insidethisplace(X,Y,_ListN,[])),
+						asserta(insidethisplace(X2,Y2,_ListB,ELNew)),
+						randomEnemy(M,N).
+
+randomEnemy(_,Y) :- Y == 21, nl, break,
+						write('The enemies has moved.').
 
 /* Take object from where you are, and put it in backpack, max item in backpack = 4 */
 
@@ -401,30 +514,61 @@ take(Obj) :- ingamestate(1),
 						count(BagList,Total),
 						Total < 4,
 						player_pos(X, Y),
-						locationName(X, Y, _),
-						insidethisplace(X,Y,List,_),
+						insidethisplace(X,Y,List,EList),
 						isMember(Obj,List),
-						retract(insidethisplace(X,Y,List,_)),
+						retract(insidethisplace(X,Y,List,EList)),
 						retract(bag(BagList)),
 						delElmt(Obj,List,ListNew),
-						append([Obj],BagList,BagListNew),
-						asserta(bag(BagListNew)),
-						asserta(insidethisplace(X,Y,ListNew,_)), nl,
+						append([Obj],BagList,BagListNew),nl,
 						write('You have succesfully taken a '), write(Obj) , nl,
-						desc(Obj), !.
+						desc(Obj),
+						isAttacked(EList), 
+						asserta(bag(BagListNew)),
+						asserta(insidethisplace(X,Y,ListNew,EList)),!.
 
 take(Obj) :- ingamestate(1),
 						player_pos(X, Y),
-						insidethisplace(X,Y,List,_),
+						insidethisplace(X,Y,List,EList),
 						\+isMember(Obj,List), nl,
-						writeln('What are you, drunk? Alice? That item''s not even here, you can''t just take it outta nowhere.').
+						writeln('What are you, drunk? Alice? That item''s not even here, you can''t just take it outta nowhere.'),
+						isAttacked(EList),!.
 
 take(_) :- ingamestate(1),
+						player_pos(X,Y),
+						insidethisplace(X,Y,_,EList),
 						bag(BagList),
 						count(BagList,Total),
 						Total==4,
 						write('Alice, you gonna need a bigger bag to take that,'), nl,
-						write('or you could simply drop something first before taking it.'), nl, !.
+						write('or you could simply drop something first before taking it.'), nl, 
+						isAttacked(EList),!.
+
+takeall :- ingamestate(1),
+						bag(BagList),
+						count(BagList,Total),
+						player_pos(X, Y),
+						insidethisplace(X,Y,List,EList),
+						count(List,TotalN),
+						T is TotalN + Total,
+						T < 5,
+						retract(insidethisplace(X,Y,List,EList)),
+						retract(bag(BagList)),
+						append(List,BagList,BagListNew),nl,
+						write('You have succesfully taken all the things here.'), nl,
+						isAttacked(EList), 
+						asserta(bag(BagListNew)),
+						asserta(insidethisplace(X,Y,[],EList)),!.
+
+takeall :- ingamestate(1),
+						bag(BagList),
+						count(BagList,Total),
+						player_pos(X, Y),
+						insidethisplace(X,Y,List,EList),
+						count(List,TotalN),
+						T is TotalN + Total,
+						T > 4,
+						write('Your bag''s not big enough to take it all.'), nl,
+						isAttacked(EList),!.
 
 /* Drop object from your backpack to the place */
 
@@ -434,32 +578,66 @@ drop(Obj) :- ingamestate(1),
 						count(BagList,Total),
 						Total > 0,
 						player_pos(X, Y),
-						insidethisplace(X,Y,List,_),
-						retract(insidethisplace(X,Y,List,_)),
+						insidethisplace(X,Y,List,EList),
+						retract(insidethisplace(X,Y,List,EList)),
 						retract(bag(BagList)),
 						delElmt(Obj,BagList,BagListNew),
-						append([Obj],List,ListNew),
+						append([Obj],List,ListNew),nl,
+						write('You have succesfully dropped your '), write(Obj) , nl, 
+						isAttacked(EList),
 						asserta(bag(BagListNew)),
-						asserta(insidethisplace(X,Y,ListNew,_)), nl,
-						write('You have succesfully dropped your '), write(Obj) , nl, !.
+						asserta(insidethisplace(X,Y,ListNew,EList)),!.
 
 drop(Obj) :- ingamestate(1),
+						player_pos(X,Y),
+						insidethisplace(X,Y,_,EList),
 						bag(BagList),
 						\+isMember(Obj,BagList), nl,
-						writeln('Stop hallucinating, Alice. You don''t have that thing in your backpack.'),nl,!.
+						writeln('Stop hallucinating, Alice. You don''t have that thing in your backpack.'),nl,
+						isAttacked(EList),!.
 
 drop(_) :- ingamestate(1),
+						player_pos(X,Y),
+						insidethisplace(X,Y,_,EList),
 						bag(BagList),
 						count(BagList,Total),
 						Total==0,
-						write('You don''t have anything in your backpack.'), nl, !.
+						write('You don''t have anything in your backpack.'), nl, !,
+						isAttacked(EList),!.
+
+dropall :- ingamestate(1),
+						bag(BagList),
+						count(BagList,Total),
+						Total > 0,
+						player_pos(X, Y),
+						insidethisplace(X,Y,List,EList),
+						retract(insidethisplace(X,Y,List,EList)),
+						retract(bag(BagList)),
+						append(BagList,List,ListNew),nl,
+						write('You have succesfully drop everything from your bag,'), nl,
+						write('but you can''t drop your life''s burden, Alice.'), nl,
+						isAttacked(EList), 
+						asserta(bag([])),
+						asserta(insidethisplace(X,Y,ListNew,EList)),!.
+
+dropall :- ingamestate(1),
+						bag(BagList),
+						count(BagList,Total),
+						Total == 0,
+						player_pos(X, Y),
+						insidethisplace(X,Y,List,EList),
+						write('Your bag''s empty, Alice.'), nl,
+						isAttacked(EList),!.
 
 use(Obj) :- bag(BagList),
 						isfood(Obj),
 						isMember(Obj, BagList),
 						hunger(H),
 						H == 100,nl,
-						writeln('Alice : Hmmm, I can\'t take another bite'),!.
+						writeln('Alice : Hmmm, I can\'t take another bite'),
+						player_pos(X,Y),
+						insidethisplace(X,Y,_,EList),
+						isAttacked(EList),!.
 
 use(Obj) :- bag(BagList),
 						isfood(Obj),
@@ -474,7 +652,10 @@ use(Obj) :- bag(BagList),
 						asserta(bag(NBagList)),
 						asserta(hunger(100)),nl,
 						write('Alice eats '), write(Obj), nl,
-						writeln('Yummyy! :)'),!.
+						writeln('Yummyy! :)'),
+						player_pos(X,Y),
+						insidethisplace(X,Y,_,EList),
+						isAttacked(EList),!.
 
 use(Obj) :- bag(BagList),
 						isfood(Obj),
@@ -488,14 +669,20 @@ use(Obj) :- bag(BagList),
 						asserta(bag(NBagList)),
 						asserta(hunger(_NewH)),nl,
 						write('Alice eats '), write(Obj), nl,
-						writeln('Yummyy! :)'),!.
+						writeln('Yummyy! :)'),
+						player_pos(X,Y),
+						insidethisplace(X,Y,_,EList),
+						isAttacked(EList),!.
 
 use(Obj) :- bag(BagList),
 						isdrink(Obj),
 						isMember(Obj, BagList),
 						thirsty(T),
 						T == 100,nl,
-						writeln('Alice : No, i\'am not thirsty'),!.
+						writeln('Alice : No, i\'am not thirsty'),
+						player_pos(X,Y),
+						insidethisplace(X,Y,_,EList),
+						isAttacked(EList),!.
 
 use(Obj) :- bag(BagList),
 						isdrink(Obj),
@@ -510,7 +697,10 @@ use(Obj) :- bag(BagList),
 						asserta(bag(NBagList)),
 						asserta(thirsty(100)),nl,
 						write('Alice drinks '), write(Obj), nl,
-						writeln('Sluuurrpp! :)'),!.
+						writeln('Sluuurrpp! :)'),
+						player_pos(X,Y),
+						insidethisplace(X,Y,_,EList),
+						isAttacked(EList),!.
 
 use(Obj) :- bag(BagList),
 						isdrink(Obj),
@@ -524,14 +714,20 @@ use(Obj) :- bag(BagList),
 						asserta(bag(NBagList)),
 						asserta(thirsty(_NewT)),nl,
 						write('Alice drinks '), write(Obj), nl,
-						writeln('Sluuurrpp! :)'),!.
+						writeln('Sluuurrpp! :)'),
+						player_pos(X,Y),
+						insidethisplace(X,Y,_,EList),
+						isAttacked(EList),!.
 
 use(Obj) :- bag(BagList),
 						ismedicine(Obj),
 						isMember(Obj, BagList),
 						health(H),
 						H == 100,nl,
-						writeln('Alice : No, I don\'t need this now'),!.
+						writeln('Alice : No, I don\'t need this now'),
+						player_pos(X,Y),
+						insidethisplace(X,Y,_,EList),
+						isAttacked(EList),!.
 
 use(Obj) :- bag(BagList),
 						ismedicine(Obj),
@@ -546,7 +742,10 @@ use(Obj) :- bag(BagList),
 						asserta(bag(NBagList)),
 						asserta(health(100)),nl,
 						write('Alice uses '), write(Obj), nl,
-						writeln('I feel better now :)'),!.
+						writeln('I feel better now :)'),
+						player_pos(X,Y),
+						insidethisplace(X,Y,_,EList),
+						isAttacked(EList),!.
 
 use(Obj) :- bag(BagList),
 						ismedicine(Obj),
@@ -560,7 +759,10 @@ use(Obj) :- bag(BagList),
 						asserta(bag(NBagList)),
 						asserta(health(_NewH)),nl,
 						write('Alice use '), write(Obj), nl,
-						writeln('I feel better now :)'),!.
+						writeln('I feel better now :)'),
+						player_pos(X,Y),
+						insidethisplace(X,Y,_,EList),
+						isAttacked(EList),!.
 
 use(Obj) :- bag(BagList),
 						isweapon(Obj),
@@ -573,28 +775,39 @@ use(Obj) :- bag(BagList),
 						append([Obj], Weapon, _NewW),
 						asserta(bag(NBagList)),
 						asserta(weapon(_NewW)),nl,
-						write('Now, you will use '), write(Obj), writeln(' to protect yourself from the zombie.'),!.
+						write('Now, you will use '), write(Obj), writeln(' to protect yourself from the zombie.'),
+						player_pos(X,Y),
+						insidethisplace(X,Y,_,EList),
+						isAttacked(EList),!.
 
 use(Obj) :- isweapon(Obj),
 						weapon(W),
 						\+islistkosong(W),nl,
-						writeln('You\'re already use weapon in your hand'),!.
+						writeln('You already equipped the weapon in your hand'),
+						player_pos(X,Y),
+						insidethisplace(X,Y,_,EList),
+						isAttacked(EList),!.
 
 use(Obj) :- bag(BagList),
 						\+isMember(Obj, BagList),nl,
-					 write(Obj), writeln(' isn\'t available in your bag'),!.
+					write(Obj), writeln(' isn\'t available in your bag'),
+					player_pos(X,Y),
+					insidethisplace(X,Y,_,EList),
+					isAttacked(EList),!.
 
 attack	:- ingamestate(1),
 					 player_pos(X,Y),
 					 insidethisplace(X,Y,_,EList),
 					 isEnemy(EList),
-					 calcbyzombiename(EList),!.
+					 calcbyzombiename(EList),
+					 randomEnemy(0,0),!.
 
 attack :- ingamestate(1),
 					 player_pos(X,Y),
 					 insidethisplace(X,Y,_,EList),
 					 \+isEnemy(EList),
-					writeln('There is no enemy here. Be focus Alice! :(').
+					writeln('There is no enemy here. Be focus Alice! :('),
+					randomEnemy(0,0).
 
 status :- ingamestate(1),
 		weapon(WeaponList),
@@ -667,7 +880,7 @@ go(Direction) :-
 			asserta(countstep(_NS)),
 			asserta(hunger(Ha)),
 			asserta(player_pos(Xb,Yb)),
-			look, !.
+			look,!.
 
 go(Direction) :-
 			ingamestate(1),
@@ -689,7 +902,7 @@ go(Direction) :-
 			asserta(hunger(Ha)),
 			asserta(thirsty(Ta)),
 			asserta(player_pos(Xb,Yb)),
-			look, !.
+			look,!.
 
 go(Direction) :-
 			ingamestate(1),
@@ -715,7 +928,7 @@ go(_) :-
 
 
 go(_) :- ingamestate(1),
-			writeln('Your inputs wrong. Undefined!.'), !.
+			writeln('Your inputs wrong. Undefined!.'),!.
 
 go(_) :- ingamestate(0),
 			writeln('You must start the game first!').
