@@ -3,10 +3,10 @@
 
 /*
 Anggota kelompok :
-	1. Ivan Jonathan			13516
-	2. Seperayo					13516
+	1. Ivan Jonathan						13516059
+	2. Seperayo									13516068
 	3. Muhammad Alfian Rasyidin	13516104
-	4. Hafizh Budiman			13516
+	4. Hafizh Budiman						13516137
 
 /*Dynamics fact disini itu fact bisa berubah2 seiring berjalan game
 *Untuk player position ,look, dll yang berhubungan sama maps itu belum bisa dibuat
@@ -323,7 +323,14 @@ look :- ingamestate(1),
 		write('You are in '), write(Place), writeifenemynearby(EList), nl,
 		writeln('Items in this place is/are '), writelist(List),!.
 
-help :- writeln('These are the available commands:'),
+help :- writeln(' _______ ___     ___ _______ _______     __   __ _______     __   __ __   __ _______ ______   _______ ___     ___     _______     _______ _______     '),
+				writeln('|   _   |   |   |   |   ____|       |   |  | |  |       |   |  | |  |  |_|  |  _    |    _ | |       |   |   |   |   |   _   |   |  _____|       |    '),
+				writeln('|  |_|  |   |   |   |  |    |    ___|   |  |_|  |  _____|   |  | |  |       | |_|   |   | || |    ___|   |   |   |   |  |_|  |   |  |    |   _   |    '),
+				writeln('|       |   |   |   |  |    |   |___    |       | |_____    |  | |  |       |       |   |_||_|   |___|   |   |   |   |       |   |  |    |  | |  |    '),
+				writeln('|       |   |___|   |  |    |    ___|   |       |_____  |   |  |_|  |       |  _   ||    __  |    ___|   |___|   |___|       |   |  |    |  |_|  |___  '),
+				writeln('|   _   |       |   |  |____|   |___     |     | _____| |   |       | ||_|| | |_|   |   |  | |   |___|       |       |   _   |   |  |____|       |   | '),
+				writeln('|__| |__|_______|___|_______|_______|     |___| |_______|   |_______|_|   |_|_______|___|  |_|_______|_______|_______|__| |__|   |_______|_______|___|  '),
+		writeln('These are the available commands:'),
 		writeln('- start.          = start the game.'),
 		writeln('- north. east. west. south. = go to somewhere (follow compass rules).'),
 		writeln('- look.           = look things around you.'),
@@ -333,6 +340,8 @@ help :- writeln('These are the available commands:'),
 		writeln('- drop(Obj).      = drop an object.'),
 		writeln('- use(Obj)        = use an object.'),
 		writeln('- attack.         = attack enemy that accross your path.'),
+		writeln('- takeall.        = take all objects in your place.'),
+		writeln('- dropall.        = drop all objects in inventory.'),
 		writeln('- status.         = display Alice status.'),
 		writeln('- save(FileName). = save your game.'),
 		writeln('- loads(FileName).= load previously saved game.'),
@@ -475,7 +484,7 @@ randomEnemy(X,Y) :- insidethisplace(X,Y,_ListN,EList),
 						EList \= [],
 						X < 11, Y < 21,
 						M is X + 1, N is Y,
-						A is X mod 5, B is Y mod 4, N is A+B, 
+						A is X mod 5, B is Y mod 4, N is A+B,
 						moverand(N,X1,Y1),
 						X2 is X1 + X, Y2 is Y1 + Y,
 						X2 > -1, X2 < 11, Y2 > -1, Y2 < 21,
@@ -491,7 +500,7 @@ randomEnemy(X,Y) :- insidethisplace(X,Y,_ListN,EList),
 						EList \= [],
 						X == 10, Y < 21,
 						M is 0, N is Y + 1,
-						A is X mod 5, B is Y mod 4, N is A+B, 
+						A is X mod 5, B is Y mod 4, N is A+B,
 						moverand(N,X1,Y1),
 						X2 is X1 + X, Y2 is Y1 + Y,
 						X2 > -1, X2 < 11, Y2 > -1, Y2 < 21,
@@ -521,7 +530,7 @@ take(Obj) :- ingamestate(1),
 						append([Obj],BagList,BagListNew),nl,
 						write('You have succesfully taken a '), write(Obj) , nl,
 						desc(Obj),
-						isAttacked(EList), 
+						isAttacked(EList),
 						asserta(bag(BagListNew)),
 						asserta(insidethisplace(X,Y,ListNew,EList)),!.
 
@@ -539,7 +548,7 @@ take(_) :- ingamestate(1),
 						count(BagList,Total),
 						Total==4,
 						write('Alice, you gonna need a bigger bag to take that,'), nl,
-						write('or you could simply drop something first before taking it.'), nl, 
+						write('or you could simply drop something first before taking it.'), nl,
 						isAttacked(EList),!.
 
 takeall :- ingamestate(1),
@@ -554,7 +563,7 @@ takeall :- ingamestate(1),
 						retract(bag(BagList)),
 						append(List,BagList,BagListNew),nl,
 						write('You have succesfully taken all the things here.'), nl,
-						isAttacked(EList), 
+						isAttacked(EList),
 						asserta(bag(BagListNew)),
 						asserta(insidethisplace(X,Y,[],EList)),!.
 
@@ -582,7 +591,7 @@ drop(Obj) :- ingamestate(1),
 						retract(bag(BagList)),
 						delElmt(Obj,BagList,BagListNew),
 						append([Obj],List,ListNew),nl,
-						write('You have succesfully dropped your '), write(Obj) , nl, 
+						write('You have succesfully dropped your '), write(Obj) , nl,
 						isAttacked(EList),
 						asserta(bag(BagListNew)),
 						asserta(insidethisplace(X,Y,ListNew,EList)),!.
@@ -615,7 +624,7 @@ dropall :- ingamestate(1),
 						append(BagList,List,ListNew),nl,
 						write('You have succesfully drop everything from your bag,'), nl,
 						write('but you can''t drop your life''s burden, Alice.'), nl,
-						isAttacked(EList), 
+						isAttacked(EList),
 						asserta(bag([])),
 						asserta(insidethisplace(X,Y,ListNew,EList)),!.
 
