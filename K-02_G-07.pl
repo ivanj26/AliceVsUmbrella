@@ -3,10 +3,10 @@
 
 /*
 Anggota kelompok :
-	1. Ivan Jonathan			13516
-	2. Seperayo					13516
+	1. Ivan Jonathan			13516059
+	2. Seperayo					13516068
 	3. Muhammad Alfian Rasyidin	13516104
-	4. Hafizh Budiman			13516
+	4. Hafizh Budiman			13516137
 
 /*Dynamics fact disini itu fact bisa berubah2 seiring berjalan game
 *Untuk player position ,look, dll yang berhubungan sama maps itu belum bisa dibuat
@@ -188,7 +188,11 @@ init_dynamic_facts(X,Y) :-
 									N is 0,
 									init_dynamic_facts(M,N).
 
-start:- writeln('Welcome to Alice vs Umbrella Corp.!'),
+start:- writeln('   ___   ___           _   __      __  __      __           ____       _____              '),
+		writeln('  / _ | / (_)______   | | / /__   / / / /_ _  / /  _______ / / /__ _  / ___/__  _______   '),
+		writeln(' / __ |/ / / __/ -_)  | |/ (_-<  / /_/ /  \' \\/ _ \\/ __/ -_) / / _ \'/ / /__/ _ \\/ __/ _ \\_ '),
+		writeln('/_/ |_/_/_/\\__/\\__/   |___/___/  \\____/_/_/_/_.__/_/  \\__/_/_/\\_,_/  \\___/\\\\___/_/ / .__(_)'),
+		writeln('                                                                                 /_/      '),
 		writeln('White Queen Kingdom has been invaded by Umbrella Corp.!'),
 		writeln('Help Alice to defeat the invaders!'),
 		help,
@@ -331,12 +335,13 @@ help :- writeln('These are the available commands:'),
 		writeln('- maps.           = show map if you have one.'),
 		writeln('- take(Obj).      = pick up an object.'),
 		writeln('- drop(Obj).      = drop an object.'),
+		writeln('- dropall.        = drop all objects you have.'),
 		writeln('- use(Obj)        = use an object.'),
 		writeln('- attack.         = attack enemy that accross your path.'),
 		writeln('- status.         = display Alice status.'),
 		writeln('- save(FileName). = save your game.'),
 		writeln('- loads(FileName).= load previously saved game.'),
-		writeln('- quit.     = quit the game.'),
+		writeln('- quit.           = quit the game.'),
 		writeln('Legends : '),
 		writeln('W = Water'),
 		writeln('M = Medicine'),
